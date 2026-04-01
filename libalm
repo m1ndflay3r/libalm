@@ -4,7 +4,7 @@
 alia() {
   # take input as strings
   local num1="$1" num2="$2" working out
-  local -i num_ln neg1 neg2 is_sub sign w c
+  local -i num_ln neg1 neg2 is_sub sign w c b
   ([ -z "$num1" ] || [ -z "$num2" ]) && return 1
   # if num is neg, set flag and strip '-'
   [ ${num1::1} = '-' ] && {
@@ -45,6 +45,14 @@ alia() {
         w=$((num1[$i]-num2[$i]))
       } || {
         w=$((num2[$i]-num1[$i]))
+      }
+      ((b)) && {
+        ((w--))
+        ((b--))
+      }
+      ((w<0)) && {
+        ((b++))
+        ((w+=10))
       }
     } || {
       w=$((num1[$i]+num2[$i]))
