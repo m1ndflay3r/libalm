@@ -94,35 +94,14 @@ alia() {
 
 ## arbitrarily large float adder
 alfa() {
-  local num1="$1" num2="$2" num1_macro num1_micro num2_macro num2_micro w1 w2 macro micro out
-  local -i n1_sw n2_sw micro_ln carry_val
+  local num1="$1" num2="$2" num1_macro num1_micro num2_macro num2_micro macro micro out w10=1
+  local -i micro_ln carry_val
   ([ -z "$num1" ] || [ -z "$num2" ]) && return 1
   [[ "$num1" != *"."* ]] && num1=""$num1".0"
   [[ "$num2" != *"."* ]] && num2=""$num2".0"
   # separate n1 and n2 into micro+macro
-  for ((i=1; i>0; i++)); do
-    w1=$num1[$i]
-    w2=$num2[$i]
-    ([ -z "$w1" ] && [ -z "$w2" ]) && break
-    [[ "$w1" = '.' ]] && {
-      ((n1_sw++)); true
-    } || {
-      ((n1_sw)) && {
-        num1_micro+="$w1"
-      } || {
-        num1_macro+="$w1"
-      }
-    }
-    [[ "$w2" = '.' ]] && {
-      ((n2_sw++)); true
-    } || {
-      ((n2_sw)) && {
-        num2_micro+="$w2"
-      } || {
-        num2_macro+="$w2"
-      }
-    }
-  done
+  macro=${num1%%.*}
+  micro=${num1#*.}
   # right-pad micros with 0s to ln of largest
   ((${#num1_micro}>=${#num2_micro})) && {
     micro_ln=${#num1_micro}
@@ -155,6 +134,29 @@ alfa() {
       macro="-"$macro""
     } || {
       macro=$(alia "$macro" -1)
+    }
+  }
+  # handle fractional borrowing
+  ([[ ${macro::1} = '-' ]] && ! [[ ${micro::1} = '-' ]]) || \
+  ([[ ${micro::1} = '-' ]] && ! [[ ${macro::1} = '-' ]]) && {
+    [[ ${macro::1} = '-' ]] && {
+      macro=${macro:1}
+      macro=$(alia "$macro" -1)
+      macro="-"$macro""
+    } || {
+      macro=$(alia "$macro" -1)
+    }
+    micro_ln=${#micro}
+    print "DEBUG: "$micro_ln""
+    ((${#micro}>${#w10})) && {
+      print "DEBUG: "$w10""
+      w10="${(r:micro_ln::0:)w10}"
+    }
+    [[ ${micro::1} = '-' ]] && {
+      micro=$(alia "$w10" "$micro")
+    } || {
+      micro="-"$micro""
+      micro=$(alia "$w10" "$micro")
     }
   }
   [[ ${micro::1} = '-' ]] && micro=${micro:1}
