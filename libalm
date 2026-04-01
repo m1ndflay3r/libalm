@@ -1,0 +1,75 @@
+#!/usr/bin/env zsh
+
+## arbitrarily large integer adder
+alia() {
+  # take input as strings
+  local num1="$1" num2="$2" working out
+  local -i num_ln pointer next neg1 neg2 is_sub
+  ([ -z "$num1" ] || [ -z "$num2" ]) && return 1
+  [ ${num1::1} = '-' ] && ((neg1++))
+  [ ${num2::1} = '-' ] && ((neg2++))
+  # if one number is negative but the other isnt, treat as subtraction
+  ((((neg1)) && ! ((neg2))) || \
+   (((neg2)) && ! ((neg1)))) && {
+    ((is_sub++))
+  }
+  # strip minus symbol from negative numbers
+  ((neg1)) && num1=${num1:1}
+  ((neg2)) && num2=${num2:1}
+  # zero-pad shorter num
+  ((${#num1}>=${#num2})) && {
+    num_ln=${#num1}
+    until ((${#num2}==${#num1})); do
+      num2="0"$num2""
+    done
+  } || {
+    num_ln=${#num2}
+    until ((${#num2}==${#num1})); do
+      num1="0"$num1""
+    done
+  }
+  # add nums to stack in reverse order for left->right parsing
+  typeset -A ala_stack
+  for ((i=num_ln; i>0; i--)); do
+    ((pointer++))
+    ala_stack[$pointer,1]=$num1[$i]
+    ala_stack[$pointer,2]=$num2[$i]
+  done
+  # iterate over stack and add
+  for ((i=1; i<=pointer; i++)); do
+    # add num 1 and num2 for current indice
+    ((is_sub)) && {
+      working=$((ala_stack[$i,1]-ala_stack[$i,2]))
+    } || {
+      working=$((ala_stack[$i,1]+ala_stack[$i,2]))
+    }
+    # if num 3 not empty, add that as well
+    ! [ -z "$ala_stack[$i,3]" ] && {
+      ((is_sub)) && {
+        working=$((working-ala_stack[$i,3]))
+      } || {
+        working=$((working+ala_stack[$i,3]))
+      }
+    }
+    # if results gt | lt 9, add left aligned digit to next pointer location
+    ((working>9)) && {
+      next=$((i+1))
+      ala_stack[$next,3]=${working::1}
+      working=${working:1}
+    }
+    ((working<9)) && {
+      next=$((i+1))
+      ala_stack[$next,3]=1
+      working=${working:1}
+    }
+    ala_stack[$i,4]=$working
+  done
+  # right->left align num before print
+  local -i i
+  while true; do
+    ((i++))
+    [ -z "$ala_stack[$i,4]" ] && break
+    out=""$out""$ala_stack[$i,4]""
+  done
+  print -r "$out"
+}
