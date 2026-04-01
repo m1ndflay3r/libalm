@@ -68,7 +68,7 @@ alia() {
     out=""$w""$out""
   done
   # add last carry if needed
-  ((c)) && out="1"$out""
+  (((c)) && [ -z "$ret_carry" ]) && out="1"$out""
   # strip unneeded zeros
   [[ ${out::1} = 0 ]] && {
     until [[ ${out::1} != '0' ]]; do
@@ -80,10 +80,86 @@ alia() {
   ((sign)) && out="-"$out""
   # print result
   print -r "$out"
-  # if ret_carry is set, return $c (for alfa); else return 0
+  # if ret_carry is set, return $c/$b (for alfa); else return 0
   ! [ -z "$ret_carry" ] && {
-    return $c
+    ((is_sub)) && {
+      return $((b+2))
+    } || {
+      return $c
+    }
   } || {
     return 0
   }
+}
+
+## arbitrarily large float adder
+alfa() {
+  local num1="$1" num2="$2" num1_macro num1_micro num2_macro num2_micro w1 w2 macro micro out
+  local -i n1_sw n2_sw micro_ln carry_val
+  ([ -z "$num1" ] || [ -z "$num2" ]) && return 1
+  [[ "$num1" != *"."* ]] && num1=""$num1".0"
+  [[ "$num2" != *"."* ]] && num2=""$num2".0"
+  # separate n1 and n2 into micro+macro
+  for ((i=1; i>0; i++)); do
+    w1=$num1[$i]
+    w2=$num2[$i]
+    ([ -z "$w1" ] && [ -z "$w2" ]) && break
+    [[ "$w1" = '.' ]] && {
+      ((n1_sw++)); true
+    } || {
+      ((n1_sw)) && {
+        num1_micro+="$w1"
+      } || {
+        num1_macro+="$w1"
+      }
+    }
+    [[ "$w2" = '.' ]] && {
+      ((n2_sw++)); true
+    } || {
+      ((n2_sw)) && {
+        num2_micro+="$w2"
+      } || {
+        num2_macro+="$w2"
+      }
+    }
+  done
+  # right-pad micros with 0s to ln of largest
+  ((${#num1_micro}>=${#num2_micro})) && {
+    micro_ln=${#num1_micro}
+    num2_micro="${(r:micro_ln::0:)num2_micro}"
+  } || {
+    micro_ln=${#num2_micro}
+    num1_micro="${(r:micro_ln::0:)num1_micro}"
+  }
+  # micros should have same sign as macros
+  [[ ${num1_macro::1} = '-' ]] && num1_micro="-"$num1_micro""
+  [[ ${num2_macro::1} = '-' ]] && num2_micro="-"$num2_micro""
+  # add macro
+  macro=$(alia "$num1_macro" "$num2_macro")
+  # add micro, handle carry
+  micro=$(ret_carry=1 alia "$num1_micro" "$num2_micro")
+  carry_val=$?
+  ((carry_val==1)) && {
+    [[ ${macro::1} = '-' ]] && {
+      macro=${macro:1}
+      macro=$(alia "$macro" 1)
+      macro="-"$macro""
+    } || {
+      macro=$(alia "$macro" 1)
+    }
+  }
+  ((carry_val==3)) && {
+    [[ ${macro::1} = '-' ]] && {
+      macro=${macro:1}
+      macro=$(alia "$macro" -1)
+      macro="-"$macro""
+    } || {
+      macro=$(alia "$macro" -1)
+    }
+  }
+  [[ ${micro::1} = '-' ]] && micro=${micro:1}
+  # reassemble output
+  out=""$macro"."$micro""
+  [[ "$out" = "-0.0" ]] && out="0.0"
+  print -r "$out"
 }
