@@ -100,8 +100,10 @@ alfa() {
   [[ "$num1" != *"."* ]] && num1=""$num1".0"
   [[ "$num2" != *"."* ]] && num2=""$num2".0"
   # separate n1 and n2 into micro+macro
-  macro=${num1%%.*}
-  micro=${num1#*.}
+  num1_macro=${num1%%.*}
+  num1_micro=${num1#*.}
+  num2_macro=${num2%%.*}
+  num2_micro=${num2#*.}
   # right-pad micros with 0s to ln of largest
   ((${#num1_micro}>=${#num2_micro})) && {
     micro_ln=${#num1_micro}
@@ -147,9 +149,7 @@ alfa() {
       macro=$(alia "$macro" -1)
     }
     micro_ln=${#micro}
-    print "DEBUG: "$micro_ln""
     ((${#micro}>${#w10})) && {
-      print "DEBUG: "$w10""
       w10="${(r:micro_ln::0:)w10}"
     }
     [[ ${micro::1} = '-' ]] && {
