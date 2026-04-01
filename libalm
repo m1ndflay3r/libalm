@@ -63,6 +63,7 @@ alia() {
     }
     out=""$w""$out""
   done
+  ((c)) && out="1"$out""
   ((sign)) && out="-"$out""
   print -r "$out"
 }
