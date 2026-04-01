@@ -3,7 +3,7 @@
 ## arbitrarily large integer adder
 alia() {
   # take input as strings
-  local num1="$1" num2="$2" working out
+  local num1="$1" num2="$2" working out temp
   local -i num_ln neg1 neg2 is_sub sign w c b
   ([ -z "$num1" ] || [ -z "$num2" ]) && return 1
   # if num is neg, set flag and strip '-'
@@ -34,6 +34,9 @@ alia() {
     }
     [[ "$num2" > "$num1" ]] && {
       ((neg2)) && ((sign++))
+      temp="$num1"
+      num1="$num2"
+      num2="$temp"
     }
   }
   # if both are neg, output is neg
@@ -41,11 +44,7 @@ alia() {
   # begin iteration over nums
   for ((i=num_ln; i>0; i--)); do
     ((is_sub)) && {
-      [[ "$num1" > "$num2" ]] && {
-        w=$((num1[$i]-num2[$i]))
-      } || {
-        w=$((num2[$i]-num1[$i]))
-      }
+      w=$((num1[$i]-num2[$i]))
       ((b)) && {
         ((w--))
         ((b--))
@@ -54,6 +53,7 @@ alia() {
         ((b++))
         ((w+=10))
       }
+      true
     } || {
       w=$((num1[$i]+num2[$i]))
       ((c)) && {
@@ -67,7 +67,17 @@ alia() {
     }
     out=""$w""$out""
   done
+  # add last carry if needed
   ((c)) && out="1"$out""
+  # strip unneeded zeros
+  [[ ${out::1} = 0 ]] && {
+    until [[ ${out::1} != '0' ]]; do
+      ((${#out}==1)) && break
+      out=${out:1}
+    done
+  }
+  # add neg sign if needed
   ((sign)) && out="-"$out""
+  # print result
   print -r "$out"
 }
