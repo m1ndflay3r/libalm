@@ -4,18 +4,21 @@
 alia() {
   # take input as strings
   local num1="$1" num2="$2" working out
-  local -i num_ln pointer next neg1 neg2 is_sub
+  local -i num_ln neg1 neg2 is_sub sign w c
   ([ -z "$num1" ] || [ -z "$num2" ]) && return 1
-  [ ${num1::1} = '-' ] && ((neg1++))
-  [ ${num2::1} = '-' ] && ((neg2++))
+  # if num is neg, set flag and strip '-'
+  [ ${num1::1} = '-' ] && {
+    ((neg1++))
+    num1=${num1:1}
+  }
+  [ ${num2::1} = '-' ] && {
+    ((neg2++))
+    num2=${num2:1}
+  }
   # if one number is negative but the other isnt, treat as subtraction
-  ((((neg1)) && ! ((neg2))) || \
-   (((neg2)) && ! ((neg1)))) && {
+  ((neg1!=neg2)) && {
     ((is_sub++))
   }
-  # strip minus symbol from negative numbers
-  ((neg1)) && num1=${num1:1}
-  ((neg2)) && num2=${num2:1}
   # zero-pad shorter num
   ((${#num1}>=${#num2})) && {
     num_ln=${#num1}
@@ -28,48 +31,38 @@ alia() {
       num1="0"$num1""
     done
   }
-  # add nums to stack in reverse order for left->right parsing
-  typeset -A ala_stack
-  for ((i=num_ln; i>0; i--)); do
-    ((pointer++))
-    ala_stack[$pointer,1]=$num1[$i]
-    ala_stack[$pointer,2]=$num2[$i]
-  done
-  # iterate over stack and add
-  for ((i=1; i<=pointer; i++)); do
-    # add num 1 and num2 for current indice
-    ((is_sub)) && {
-      working=$((ala_stack[$i,1]-ala_stack[$i,2]))
-    } || {
-      working=$((ala_stack[$i,1]+ala_stack[$i,2]))
+  # if is sub, we take sign of larger num
+  ((is_sub)) && {
+    [[ "$num1" > "$num2" ]] && {
+      ((neg1)) && ((sign++))
     }
-    # if num 3 not empty, add that as well
-    ! [ -z "$ala_stack[$i,3]" ] && {
-      ((is_sub)) && {
-        working=$((working-ala_stack[$i,3]))
+    [[ "$num2" > "$num1" ]] && {
+      ((neg2)) && ((sign++))
+    }
+  }
+  # if both are neg, output is neg
+  (((neg1)) && ((neg2))) && ((sign++))
+  # begin iteration over nums
+  for ((i=num_ln; i>0; i--)); do
+    ((is_sub)) && {
+      [[ "$num1" > "$num2" ]] && {
+        w=$((num1[$i]-num2[$i]))
       } || {
-        working=$((working+ala_stack[$i,3]))
+        w=$((num2[$i]-num1[$i]))
+      }
+    } || {
+      w=$((num1[$i]+num2[$i]))
+      ((c)) && {
+        ((w++))
+        ((c--))
+      }
+      ((w>=10)) && {
+        ((c++))
+        w=${w:1}
       }
     }
-    # if results gt | lt 9, add left aligned digit to next pointer location
-    ((working>9)) && {
-      next=$((i+1))
-      ala_stack[$next,3]=${working::1}
-      working=${working:1}
-    }
-    ((working<9)) && {
-      next=$((i+1))
-      ala_stack[$next,3]=1
-      working=${working:1}
-    }
-    ala_stack[$i,4]=$working
+    out=""$w""$out""
   done
-  # right->left align num before print
-  local -i i
-  while true; do
-    ((i++))
-    [ -z "$ala_stack[$i,4]" ] && break
-    out=""$out""$ala_stack[$i,4]""
-  done
+  ((sign)) && out="-"$out""
   print -r "$out"
 }
