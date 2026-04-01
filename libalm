@@ -80,4 +80,10 @@ alia() {
   ((sign)) && out="-"$out""
   # print result
   print -r "$out"
+  # if ret_carry is set, return $c (for alfa); else return 0
+  ! [ -z "$ret_carry" ] && {
+    return $c
+  } || {
+    return 0
+  }
 }
