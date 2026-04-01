@@ -22,14 +22,10 @@ alia() {
   # zero-pad shorter num
   ((${#num1}>=${#num2})) && {
     num_ln=${#num1}
-    until ((${#num2}==${#num1})); do
-      num2="0"$num2""
-    done
+    num2="${(l:num_ln::0:)num2}"
   } || {
     num_ln=${#num2}
-    until ((${#num2}==${#num1})); do
-      num1="0"$num1""
-    done
+    num1="${(l:num_ln::0:)num1}"
   }
   # if is sub, we take sign of larger num
   ((is_sub)) && {
