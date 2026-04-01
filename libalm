@@ -95,7 +95,7 @@ alia() {
 ## arbitrarily large float adder
 alfa() {
   local num1="$1" num2="$2" num1_macro num1_micro num2_macro num2_micro macro micro out w10=1
-  local -i micro_ln carry_val
+  local -i micro_ln carry_val pad_ln
   ([ -z "$num1" ] || [ -z "$num2" ]) && return 1
   [[ "$num1" != *"."* ]] && num1=""$num1".0"
   [[ "$num2" != *"."* ]] && num2=""$num2".0"
@@ -149,9 +149,8 @@ alfa() {
       macro=$(alia "$macro" -1)
     }
     micro_ln=${#micro}
-    ((${#micro}>${#w10})) && {
-      w10="${(r:micro_ln::0:)w10}"
-    }
+    pad_ln=$((micro_ln+1))
+    w10="${(r:pad_ln::0:)w10}"
     [[ ${micro::1} = '-' ]] && {
       micro=$(alia "$w10" "$micro")
     } || {
