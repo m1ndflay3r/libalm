@@ -1,5 +1,41 @@
 #!/usr/bin/env zsh
 
+## arbitrarily large comparator
+alcm() {
+  local num1="$1" num2="$2" n1_macro n1_micro n2_macro n2_micro w1 w2 micro_ln num_ln
+  ([ -z "$num1" ] || [ -z "$num2" ]) && {
+    return 0
+  }
+  # separate int from decimal
+  n1_macro=${num1%%.*}
+  n1_micro=${num1#*.}
+  n2_macro=${num2%%.*}
+  n2_micro=${num2#*.}
+  # right pad decimals with 0s until same length
+  ((${#n1_micro}>=${#n2_micro})) && {
+    micro_ln=${#n1_micro}
+    n2_micro="${(r:micro_ln::0:)n2_micro}"
+  } || {
+    micro_ln=${#n2_micro}
+    n1_micro="${(r:micro_ln::0:)n1_micro}"
+  }
+  # reconstruct num1 and num2 as integers
+  num1=""$n1_macro""$n1_micro""
+  num2=""$n2_macro""$n2_micro""
+  # if string lengths differ, one is obviously larger
+  ((${#num1}>${#num2})) && return 1
+  ((${#num1}<${#num2})) && return 2
+  # if we've gotten this far, they must be the same length. begin checking nums one at a time.
+  num_ln=${#num1}
+  for ((i=1; i<=num_ln; i++)); do
+    w1=$num1[$i]; w2=$num2[$i]
+    ((w1>w2)) && return 1
+    ((w1<w2)) && return 2
+  done
+  # if we've reached here, nums must be the same
+  return 3
+}
+
 ## arbitrarily large integer adder
 alia() {
   # take input as strings
