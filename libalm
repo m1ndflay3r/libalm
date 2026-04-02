@@ -3,11 +3,28 @@
 ## arbitrarily large comparator
 alcm() {
   local num1="$1" num2="$2" n1_macro n1_micro n2_macro n2_micro w1 w2 micro_ln num_ln
+  local -i neg1 neg2
   ([ -z "$num1" ] || [ -z "$num2" ]) && {
     return 0
   }
+  # ensure nums are valid float
   [[ "$num1" != *'.'* ]] && num1=""$num1".0"
   [[ "$num2" != *'.'* ]] && num2=""$num2".0"
+  # -0 and 0 are the same, so lets not confuse anything
+  [[ "$num1" = '-0.0' ]] && num1='0.0'
+  [[ "$num2" = '-0.0' ]] && num2='0.0'
+  # handle negatives
+  [[ ${num1::1} = '-' ]] && {
+    ((neg1++))
+    num1=${num1:1}
+  }
+  [[ ${num2::1} = '-' ]] && {
+    ((neg2++))
+    num2=${num2:1}
+  }
+  # if one num is neg but the other isnt we have our answer
+  (((neg1)) && ! ((neg2))) && return 2
+  (((neg2)) && ! ((neg1))) && return 1
   # strip leading zeros
   [[ ${num1::1} = 0 ]] && {
     until [[ ${num1::1} != '0' ]]; do
@@ -40,16 +57,19 @@ alcm() {
   # reconstruct num1 and num2 as integers
   num1=""$n1_macro""$n1_micro""
   num2=""$n2_macro""$n2_micro""
-  # if string lengths differ, one is obviously larger
-  ((${#num1}>${#num2})) && return 1
-  ((${#num1}<${#num2})) && return 2
-  # if we've gotten this far, they must be the same length. begin checking nums one at a time.
-  num_ln=${#num1}
-  for ((i=1; i<=num_ln; i++)); do
-    w1=$num1[$i]; w2=$num2[$i]
-    ((w1>w2)) && return 1
-    ((w1<w2)) && return 2
-  done
+  # neg comparator
+  ((neg1)) && {
+    ((${#num1}>${#num2})) && return 2
+    ((${#num1}<${#num2})) && return 1
+    [[ "$num1" > "$num2" ]] && return 2
+    [[ "$num1" < "$num2" ]] && return 1
+  # pos comparator
+  } || {
+    ((${#num1}>${#num2})) && return 1
+    ((${#num1}<${#num2})) && return 2
+    [[ "$num1" > "$num2" ]] && return 1
+    [[ "$num1" < "$num2" ]] && return 2
+  }
   # if we've reached here, nums must be the same
   return 3
 }
