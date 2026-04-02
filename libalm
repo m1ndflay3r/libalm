@@ -6,6 +6,24 @@ alcm() {
   ([ -z "$num1" ] || [ -z "$num2" ]) && {
     return 0
   }
+  [[ "$num1" != *'.'* ]] && num1=""$num1".0"
+  [[ "$num2" != *'.'* ]] && num2=""$num2".0"
+  # strip leading zeros
+  [[ ${num1::1} = 0 ]] && {
+    until [[ ${num1::1} != '0' ]]; do
+      ((${#num1}==1)) && break
+      num1=${num1:1}
+    done
+  }
+  [[ ${num2::1} = 0 ]] && {
+    until [[ ${num2::1} != '0' ]]; do
+      ((${#num2}==1)) && break
+      num2=${num2:1}
+    done
+  }
+  # adjust in case num was below zero decimal
+  [[ ${num1::1} = '.' ]] && num1="0"$num1""
+  [[ ${num2::1} = '.' ]] && num2="0"$num1""
   # separate int from decimal
   n1_macro=${num1%%.*}
   n1_micro=${num1#*.}
