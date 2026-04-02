@@ -164,3 +164,19 @@ alfa() {
   [[ "$out" = "-0.0" ]] && out="0.0"
   print -r "$out"
 }
+
+## arbitrarily large integer multiplier
+alim() {
+}
+
+## arbitrarily large float multiplier
+alfm() {
+}
+
+## arbitrarily large integer divider
+alid() {
+}
+
+## arbitrarily large float divider
+alfd() {
+}
