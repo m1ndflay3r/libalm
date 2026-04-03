@@ -28,13 +28,11 @@ alcm() {
   # strip leading zeros
   [[ ${num1::1} = 0 ]] && {
     until [[ ${num1::1} != '0' ]]; do
-      ((${#num1}==1)) && break
       num1=${num1:1}
     done
   }
   [[ ${num2::1} = 0 ]] && {
     until [[ ${num2::1} != '0' ]]; do
-      ((${#num2}==1)) && break
       num2=${num2:1}
     done
   }
@@ -241,7 +239,26 @@ alfa() {
 
 ## arbitrarily large integer multiplier
 alim() {
-  
+  local num1="$1" num2="$2" out='0'
+  local -i neg1 neg2 is_neg shft carry
+  ([ -z "$num1" ] || [ -z "$num2" ]) && return 1
+  # trim negs
+  [[ ${num1::1} = '-' ]] && {
+    num1=${num1:1}
+    ((neg1++))
+  }
+  [[ ${num2::1} = '-' ]] && {
+    num2=${num2:1}
+    ((neg2++))
+  }
+  # handle negs
+  ((((neg1)) && ! ((neg2))) || \
+   (((neg2)) && ! ((neg1)))) && {
+    ((is_neg++))
+  }
+  # outer loop - read num2 from r to l
+  for ((i=${#num2}; i>0; i--)); do
+  done
 }
 
 ## arbitrarily large float multiplier
