@@ -5,7 +5,7 @@ alcm() {
   local num1="$1" num2="$2" n1_macro n1_micro n2_macro n2_micro w1 w2 micro_ln num_ln
   local -i neg1 neg2
   # since we use return for result, use 0 to indicate invalid
-  ([ -z "$num1" ] || [ -z "$num2" ]) && return 0
+  [[ -z "$num1" || -z "$num2" ]] && return 0
   # ensure nums are valid float
   [[ "$num1" != *'.'* ]] && num1=""$num1".0"
   [[ "$num2" != *'.'* ]] && num2=""$num2".0"
@@ -76,7 +76,7 @@ alia() {
   # take input as strings
   local num1="$1" num2="$2" working out temp
   local -i num_ln neg1 neg2 is_sub sign w c b
-  ([ -z "$num1" ] || [ -z "$num2" ]) && return 1
+  [[ -z "$num1" || -z "$num2" ]] && return 1
   # if num is neg, set flag and strip '-'
   [ ${num1::1} = '-' ] && {
     ((neg1++))
@@ -167,7 +167,7 @@ alia() {
 alfa() {
   local num1="$1" num2="$2" num1_macro num1_micro num2_macro num2_micro macro micro out w10=1
   local -i micro_ln carry_val pad_ln
-  ([ -z "$num1" ] || [ -z "$num2" ]) && return 1
+  [[ -z "$num1" || -z "$num2" ]] && return 1
   [[ "$num1" != *"."* ]] && num1=""$num1".0"
   [[ "$num2" != *"."* ]] && num2=""$num2".0"
   # separate n1 and n2 into micro+macro
@@ -210,8 +210,7 @@ alfa() {
     }
   }
   # handle fractional borrowing
-  ([[ ${macro::1} = '-' ]] && ! [[ ${micro::1} = '-' ]]) || \
-  ([[ ${micro::1} = '-' ]] && ! [[ ${macro::1} = '-' ]]) && {
+  [[ ( ${macro::1} = '-' && ${micro::1} != '-' ) || ( ${micro::1} = '-' && ${macro::1} != '-' ) ]] && {
     [[ ${macro::1} = '-' ]] && {
       macro=${macro:1}
       macro=$(alia "$macro" -1)
@@ -238,9 +237,14 @@ alfa() {
 
 ## arbitrarily large integer multiplier
 alim() {
-  local num1="$1" num2="$2" out='0' w1 w2 w carry='0'
-  local -i neg1 neg2 is_neg shft
-  ([ -z "$num1" ] || [ -z "$num2" ]) && return 1
+  local num1="$1" num2="$2" out='0' w1 w2 w carry='0' row=''
+  local -i neg1 neg2 is_neg shft carryln row_ln
+  [[ -z "$num1" || -z "$num2" ]] && return 1
+  # handle multiply by zero
+  [[ "$num1" = "0" || "$num2" = "0" || "$num1" = "-0" || "$num2" = "-0" ]] && {
+    print -r "0"
+    return 0
+  }
   # trim negs
   [[ ${num1::1} = '-' ]] && {
     num1=${num1:1}
@@ -258,18 +262,31 @@ alim() {
   # outer loop - read num2 from r to l
   for ((i=${#num2}; i>0; i--)); do
     w2=$num2[$i]
-    ((shft++))
+    row=''
+    carry='0'
     # inner loop - read num1 from r to l
     for ((j=${#num1}; j>0; j--)); do
       w1=$num1[$j]
       w=$(((w1*w2)+carry))
+      ((${#w}==1)) && carry='0'
       ((${#w}>1)) && {
-        carry=${w::1}
-        w=${w:1}
+        carryln=$((${#w}-1))
+        carry=${w::$carryln}
+        w=${w:$carryln}
       }
-      
+      row=""$w""$row""
     done
+    ((carry>0)) && row=""$carry""$row""
+    # zero pad row equal to current shft
+    row_ln=$((${#row}+$shft))
+    row="${(r:row_ln::0:)row}"
+    # add to total
+    out=$(alia "$out" "$row")
+    ((shft++))
   done
+  # handle neg sign
+  ((is_neg)) && out="-"$out""
+  print -r "$out"
 }
 
 ## arbitrarily large float multiplier
