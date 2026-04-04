@@ -255,8 +255,7 @@ alim() {
     ((neg2++))
   }
   # handle negs
-  ((((neg1)) && ! ((neg2))) || \
-   (((neg2)) && ! ((neg1)))) && {
+  ((neg1!=neg2)) && {
     ((is_neg++))
   }
   # outer loop - read num2 from r to l
@@ -307,8 +306,7 @@ alfm() {
     ((neg2++))
   }
   # if one num neg but other not, result is neg
-  ((((neg1)) && ! ((neg2))) || \
-   (((neg2)) && ! ((neg1)))) && {
+  ((neg1!=neg2)) && {
     ((is_neg++))
   }
   # separate decimals from integers
