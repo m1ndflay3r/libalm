@@ -291,15 +291,47 @@ alim() {
 
 ## arbitrarily large float multiplier
 alfm() {
+  local num1="$1" num2="$2" n1_macro n1_micro n2_macro n2_micro
+  local -i neg1 neg2 is_neg deci_ln
+  [[ -z "$num1" || -z "$num2" ]] && return 1
+  # ensure is valid float
+  [[ "$num1" != *"."* ]] && num1=""$num1".0"
+  [[ "$num2" != *"."* ]] && num2=""$num2".0"
+  # handle negs
+  [[ ${num1::1} = '-' ]] && {
+    num1=${num1:1}
+    ((neg1++))
+  }
+  [[ ${num2::1} = '-' ]] && {
+    num2=${num2:1}
+    ((neg2++))
+  }
+  # if one num neg but other not, result is neg
+  ((((neg1)) && ! ((neg2))) || \
+   (((neg2)) && ! ((neg1)))) && {
+    ((is_neg++))
+  }
+  # separate decimals from integers
+  num1_macro=${num1%%.*}
+  num1_micro=${num1#*.}
+  num2_macro=${num2%%.*}
+  num2_micro=${num2#*.}
+  # get decimal ln
+  deci_ln=$((${#num1_micro}+${#num2_micro}))
+  # reassemble num1 and num2 as integers
+  num1=""$num1_macro""$num1_micro""
+  num2=""$num2_macro""$num2_micro""
   
 }
 
 ## arbitrarily large integer divider
 alid() {
-  
+  local num1="$1" num2="$2"
+  [[ -z "$num1" || -z "$num2" ]] && return 1
 }
 
 ## arbitrarily large float divider
 alfd() {
-  
+  local num1="$1" num2="$2"
+  [[ -z "$num1" || -z "$num2" ]] && return 1
 }
