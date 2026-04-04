@@ -320,7 +320,7 @@ alfm() {
   num1=${num1//'.'/''}
   num2=${num2//'.'/''}
   # multiply using alim
-  w=$(alim "$num1" "num2")
+  w=$(alim "$num1" "$num2")
   # left-pad w with 0s if less than pad ln
   pad_ln=$((deci_ln+1))
   ((${#w}<pad_ln)) && {
