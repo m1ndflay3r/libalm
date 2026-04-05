@@ -163,6 +163,20 @@ alia() {
   }
 }
 
+## arbitrarily large integer subtractor
+alis() {
+  local num1="$1" num2="$2"
+  [[ -z "$num1" || -z "$num2" ]] && return 1
+  # invert sign of 2nd num
+  [[ ${num2::1} = '-' ]] && {
+    num2=${num2:1}
+  } || {
+    num2="-"$num2""
+  }
+  # feed to alia
+  alia "$num1" "$num2"
+}
+
 ## arbitrarily large float adder
 alfa() {
   local num1="$1" num2="$2" num1_macro num1_micro num2_macro num2_micro macro micro out w10=1
@@ -233,6 +247,20 @@ alfa() {
   out=""$macro"."$micro""
   [[ "$out" = "-0.0" ]] && out="0.0"
   print -r "$out"
+}
+
+## arbitrarily large float subtractor
+alfs() {
+  local num1="$1" num2="$2"
+  [[ -z "$num1" || -z "$num2" ]] && return 1
+  # invert sign of 2nd num
+  [[ ${num2::1} = '-' ]] && {
+    num2=${num2:1}
+  } || {
+    num2="-"$num2""
+  }
+  # feed to alfa
+  alfa "$num1" "$num2"
 }
 
 ## arbitrarily large integer multiplier
@@ -336,6 +364,12 @@ alfm() {
 alid() {
   local num1="$1" num2="$2"
   [[ -z "$num1" || -z "$num2" ]] && return 1
+  [[ "$num2" = '0' ]] && return 1
+  [[ "$num1" = '0' ]] && {
+    print -r '0'
+    return 0
+  }
+  
 }
 
 ## arbitrarily large float divider
