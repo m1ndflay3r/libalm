@@ -162,7 +162,15 @@ alia() {
   # add neg sign if needed
   ((sign)) && out="-"$out""
   # print result
-  print -r "$out"
+  ! [[ -z "$print_to_var" ]] && {
+    ! [[ -z "$al_outvar" ]] && {
+      eval print -r -v $al_outvar -- "$out"
+    } || {
+      print -r -v al_return -- "$out"
+    }
+  } || {
+    print -r "$out"
+  }
   # if ret_carry is set, return $c/$b (for alfa); else return 0
   ! [[ -z "$ret_carry" ]] && {
     ((is_sub)) && {
