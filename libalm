@@ -391,7 +391,7 @@ alfm() {
 
 ## arbitrarily large integer divider
 alid() {
-  local num1="$1" num2="$2" w=0 out w1 w2 tmp prev_tmp
+  local num1="$1" num2="$2" w out w1 w2 tmp prev_tmp
   local -i neg1 neg2 is_neg cmp
   [[ -z "$num1" || -z "$num2" ]] && return 1
   [[ "$num1" = '-0' ]] && num1=0
@@ -400,7 +400,7 @@ alid() {
   [[ "$num2" = '0' ]] && return 1
   # if num1 is 0, result and remainder will always be 0
   [[ "$num1" = '0' ]] && {
-    rem=0
+    al_rem=0
     print -r '0'
     return 0
   }
@@ -432,10 +432,12 @@ alid() {
         w=${w:1}
       done
     }
+    # if num2 > w, write 0
     alcm "$w" "$num2"; cmp=$?
     ((cmp==2)) && {
       out+="0"
       continue
+    # else do long divide (guessing loop)
     } || {
       tmp="0"
       for ((j=1; j>0; j++)); do
@@ -451,7 +453,17 @@ alid() {
       w=$(alis "$w" "$prev_tmp")
     }
   done
-  
+  # strip 0s from out
+  until [[ ${out::1} != '0' ]]; do
+    ((${#out}==1)) && break
+    out=${out:1}
+  done
+  # set neg if needed
+  ((is_neg)) && out="-"$out""
+  # set remainder to al_rem
+  al_rem="$w"
+  # output result
+  print -r "$out"
 }
 
 ## arbitrarily large float divider
