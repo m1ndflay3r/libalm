@@ -417,7 +417,7 @@ alid() {
   # if num1 is less than num2, exit with remainder
   alcm "$num1" "$num2"; cmp=$?
   ((cmp==2)) && {
-    rem="$num1"
+    al_rem="$num1"
     print -r '0'
     return 0
   }
