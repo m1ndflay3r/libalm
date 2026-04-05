@@ -78,11 +78,11 @@ alia() {
   local -i num_ln neg1 neg2 is_sub sign w c b
   [[ -z "$num1" || -z "$num2" ]] && return 1
   # if num is neg, set flag and strip '-'
-  [ ${num1::1} = '-' ] && {
+  [[ ${num1::1} = '-' ]] && {
     ((neg1++))
     num1=${num1:1}
   }
-  [ ${num2::1} = '-' ] && {
+  [[ ${num2::1} = '-' ]] && {
     ((neg2++))
     num2=${num2:1}
   }
@@ -139,7 +139,7 @@ alia() {
     out=""$w""$out""
   done
   # add last carry if needed
-  (((c)) && [ -z "$ret_carry" ]) && out="1"$out""
+  (((c)) && [[ -z "$ret_carry" ]]) && out="1"$out""
   # strip unneeded zeros
   [[ ${out::1} = 0 ]] && {
     until [[ ${out::1} != '0' ]]; do
@@ -152,7 +152,7 @@ alia() {
   # print result
   print -r "$out"
   # if ret_carry is set, return $c/$b (for alfa); else return 0
-  ! [ -z "$ret_carry" ] && {
+  ! [[ -z "$ret_carry" ]] && {
     ((is_sub)) && {
       return $((b+2))
     } || {
