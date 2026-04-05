@@ -77,6 +77,9 @@ alia() {
   local num1="$1" num2="$2" working out temp
   local -i num_ln neg1 neg2 is_sub sign w c b
   [[ -z "$num1" || -z "$num2" ]] && return 1
+  # treat 0 and -0 the same
+  [[ "$num1" = '-0' ]] && num1=0
+  [[ "$num2" = '-0' ]] && num2=0
   # if num is neg, set flag and strip '-'
   [[ ${num1::1} = '-' ]] && {
     ((neg1++))
@@ -184,6 +187,9 @@ alfa() {
   [[ -z "$num1" || -z "$num2" ]] && return 1
   [[ "$num1" != *"."* ]] && num1=""$num1".0"
   [[ "$num2" != *"."* ]] && num2=""$num2".0"
+  # treat 0.0 and -0.0 the same
+  [[ "$num1" = '-0.0' ]] && num1=0.0
+  [[ "$num2" = '-0.0' ]] && num2=0.0
   # separate n1 and n2 into micro+macro
   num1_macro=${num1%%.*}
   num1_micro=${num1#*.}
@@ -324,6 +330,11 @@ alfm() {
   # ensure is valid float
   [[ "$num1" != *"."* ]] && num1=""$num1".0"
   [[ "$num2" != *"."* ]] && num2=""$num2".0"
+  # fast exit on 0
+  [[ "$num1" = '0.0' || "$num1" = '-0.0' || "$num2" = '0.0' || "$num2" = '-0.0' ]] && {
+    print -r '0.0'
+    return 0
+  }
   # handle negs
   [[ ${num1::1} = '-' ]] && {
     num1=${num1:1}
@@ -362,14 +373,36 @@ alfm() {
 
 ## arbitrarily large integer divider
 alid() {
-  local num1="$1" num2="$2"
+  local num1="$1" num2="$2" rem
+  local -i neg1 neg2 is_neg cmp
   [[ -z "$num1" || -z "$num2" ]] && return 1
+  [[ "$num1" = '-0' ]] && num1=0
+  [[ "$num2" = '-0' ]] && num2=0
+  # err if divide by zero
   [[ "$num2" = '0' ]] && return 1
+  # if num1 is 0, result and remainder will always be 0
   [[ "$num1" = '0' ]] && {
+    rem=0
     print -r '0'
     return 0
   }
-  
+  # handle negs
+  [[ ${num1::1} = '-' ]] && {
+    num1=${num1:1}
+    ((neg1++))
+  }
+  [[ ${num2::1} = '-' ]] && {
+    num2=${num2:1}
+    ((neg2++))
+  }
+  ((neg1!=neg2)) && ((is_neg++))
+  # if num1 is less than num2, exit with remainder
+  alcm "$num1" "$num2"; cmp=$?
+  ((cmp==2)) && {
+    rem="$num1"
+    print -r '0'
+    return 0
+  }
 }
 
 ## arbitrarily large float divider
