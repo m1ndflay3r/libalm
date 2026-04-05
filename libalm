@@ -466,6 +466,13 @@ alid() {
   print -r "$out"
 }
 
+## arbitrarily large modulo
+almo() {
+  local num1="$1" num2="$2" al_rem
+  alid "$num1" "$num2" &> /dev/null || return 1
+  print -r "$al_rem"
+}
+
 ## arbitrarily large float divider
 alfd() {
   local num1="$1" num2="$2"
