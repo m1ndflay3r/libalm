@@ -191,7 +191,7 @@ alis() {
 
 ## arbitrarily large float adder
 alfa() {
-  local num1="$1" num2="$2" outvar=${3:-al_return} num1_macro num1_micro num2_macro num2_micro macro micro out w10=1
+  local num1="$1" num2="$2" outvar=${3:-al_return} num1_macro num1_micro num2_macro num2_micro macro micro alfa_out w10=1
   local -i micro_ln carry_val pad_ln
   [[ -z "$num1" || -z "$num2" ]] && return 1
   [[ "$num1" != *"."* ]] && num1=""$num1".0"
@@ -268,9 +268,9 @@ alfa() {
   }
   [[ ${micro::1} = '-' ]] && micro=${micro:1}
   # reassemble output
-  out=""$macro"."$micro""
-  [[ "$out" = "-0.0" ]] && out="0.0"
-  typeset -g "$outvar=$out"
+  alfa_out=""$macro"."$micro""
+  [[ "$alfa_out" = "-0.0" ]] && alfa_out="0.0"
+  typeset -g "$outvar=$alfa_out"
 }
 
 ## arbitrarily large float subtractor
