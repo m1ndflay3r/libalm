@@ -475,6 +475,60 @@ almo() {
 
 ## arbitrarily large float divider
 alfd() {
-  local num1="$1" num2="$2"
+  local num1="$1" num2="$2" n1_micro n2_micro n1_macro n2_macro al_rem macro micro al_scale=${al_scale:-50} next_dig out
+  local -i neg1 neg2 is_neg cmp deci_ln
   [[ -z "$num1" || -z "$num2" ]] && return 1
+  # ensure valid float
+  [[ "$num1" != *"."* ]] && num1=""$num1".0"
+  [[ "$num2" != *"."* ]] && num2=""$num2".0"
+  # treat -0.0 and 0.0 the same
+  [[ "$num1" = '-0.0' ]] && num1='0.0'
+  [[ "$num2" = '-0.0' ]] && num2='0.0'
+  # handle 0s
+  [[ "$num2" = "0.0" ]] && return 1
+  [[ "$num1" = "0.0" ]] && {
+    print -r '0.0'
+    return 0
+  }
+  # handle negs
+  [[ ${num1::1} = '-' ]] && {
+    ((neg1++))
+    num1=${num1:1}
+  }
+  [[ ${num2::1} = '-' ]] && {
+    ((neg2++))
+    num2=${num2:1}
+  }
+  ((neg1!=neg2)) && ((is_neg++))
+  # separate n1 and n2 into micro+macro
+  n1_macro=${num1%%.*}
+  n1_micro=${num1#*.}
+  n2_macro=${num2%%.*}
+  n2_micro=${num2#*.}
+  # determine decimal maxln, 0-pad micros to maxln
+  ((${#n1_micro}>=${#n2_micro})) && {
+    deci_ln=${#n1_micro}
+    n2_micro="${(r:deci_ln::0:)n2_micro}"
+  } || {
+    deci_ln=${#n2_micro}
+    n1_micro="${(r:deci_ln::0:)n1_micro}"
+  }
+  # reassemble num1 and num2 as int
+  num1=""$n1_macro""$n1_micro""
+  num2=""$n2_macro""$n2_micro""
+  # perform macro divide
+  macro=$(alid "$num1" "$num2")
+  # decimal loop
+  for ((i=0; i<al_scale; i++)); do
+    [[ "$al_rem" = '0' ]] && break
+    al_rem=""$al_rem"0"
+    next_dig=$(alid "$al_rem" "$num2")
+    micro+="$next_dig"
+  done
+  # reassembly
+  [[ -z "$micro" ]] && micro='0'
+  out=""$macro"."$micro""
+  ((is_neg)) && out="-"$out""
+  # output result
+  print -r "$out"
 }
