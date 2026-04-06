@@ -74,7 +74,7 @@ alcm() {
 ## arbitrarily large integer adder
 alia() {
   # take input as strings
-  local num1="$1" num2="$2" working out temp
+  local num1="$1" num2="$2" outvar=${3:-al_return} working out temp
   local -i num_ln neg1 neg2 is_sub sign w c b
   [[ -z "$num1" || -z "$num2" ]] && return 1
   # treat 0 and -0 the same
@@ -82,11 +82,11 @@ alia() {
   [[ "$num2" = '-0' ]] && num2=0
   # if one num is 0, answer is other num
   [[ "$num1" = '0' ]] && {
-    print -r "$num2"
+    typeset -g "$outvar=$num2"
     return 0
   }
   [[ "$num2" = '0' ]] && {
-    print -r "$num1"
+    typeset -g "$outvar=$num1"
     return 0
   }
   # if num is neg, set flag and strip '-'
@@ -162,7 +162,7 @@ alia() {
   # add neg sign if needed
   ((sign)) && out="-"$out""
   # print result
-  print -r "$out"
+  typeset -g "$outvar=$out"
   # if ret_carry is set, return $c/$b (for alfa); else return 0
   ! [[ -z "$ret_carry" ]] && {
     ((is_sub)) && {
