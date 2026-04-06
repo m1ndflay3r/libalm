@@ -289,12 +289,12 @@ alfs() {
 
 ## arbitrarily large integer multiplier
 alim() {
-  local num1="$1" num2="$2" out='0' w1 w2 w carry='0' row=''
+  local num1="$1" num2="$2" alim_out='0' outvar=${3:-al_return} w1 w2 w carry='0' row=''
   local -i neg1 neg2 is_neg shft carryln row_ln
   [[ -z "$num1" || -z "$num2" ]] && return 1
   # handle multiply by zero
   [[ "$num1" = "0" || "$num2" = "0" || "$num1" = "-0" || "$num2" = "-0" ]] && {
-    print -r "0"
+    typeset -g "$outvar=0"
     return 0
   }
   # trim negs
@@ -332,12 +332,12 @@ alim() {
     row_ln=$((${#row}+$shft))
     row="${(r:row_ln::0:)row}"
     # add to total
-    out=$(alia "$out" "$row")
+    alia "$alim_out" "$row" alim_out
     ((shft++))
   done
   # handle neg sign
-  ((is_neg)) && out="-"$out""
-  print -r "$out"
+  ((is_neg)) && alim_out="-"$alim_out""
+  typeset -g "$outvar=$alim_out"
 }
 
 ## arbitrarily large float multiplier
