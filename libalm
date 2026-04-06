@@ -177,7 +177,7 @@ alia() {
 
 ## arbitrarily large integer subtractor
 alis() {
-  local num1="$1" num2="$2"
+  local num1="$1" num2="$2" outvar=${3:-al_return}
   [[ -z "$num1" || -z "$num2" ]] && return 1
   # invert sign of 2nd num
   [[ ${num2::1} = '-' ]] && {
@@ -186,7 +186,7 @@ alis() {
     num2="-"$num2""
   }
   # feed to alia
-  alia "$num1" "$num2"
+  alia "$num1" "$num2" "$outvar"
 }
 
 ## arbitrarily large float adder
