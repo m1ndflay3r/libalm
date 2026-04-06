@@ -342,7 +342,7 @@ alim() {
 
 ## arbitrarily large float multiplier
 alfm() {
-  local num1="$1" num2="$2" n1_micro n2_micro macro micro w out
+  local num1="$1" num2="$2" outvar=${3:-al_return} n1_micro n2_micro macro micro alfm_w alfm_out
   local -i neg1 neg2 is_neg deci_ln pad_ln
   [[ -z "$num1" || -z "$num2" ]] && return 1
   # ensure is valid float
@@ -350,7 +350,7 @@ alfm() {
   [[ "$num2" != *"."* ]] && num2=""$num2".0"
   # fast exit on 0
   [[ "$num1" = '0.0' || "$num1" = '-0.0' || "$num2" = '0.0' || "$num2" = '-0.0' ]] && {
-    print -r '0.0'
+    typeset -g "$outvar=0.0"
     return 0
   }
   # handle negs
@@ -375,18 +375,18 @@ alfm() {
   num1=${num1//'.'/''}
   num2=${num2//'.'/''}
   # multiply using alim
-  w=$(alim "$num1" "$num2")
+  alim "$num1" "$num2" alfm_w
   # left-pad w with 0s if less than pad ln
   pad_ln=$((deci_ln+1))
-  ((${#w}<pad_ln)) && {
-    w="${(l:pad_ln::0:)w}"
+  ((${#alfm_w}<pad_ln)) && {
+    alfm_w="${(l:pad_ln::0:)alfm_w}"
   }
   # re-insert decimal
-  deci_ln=$((${#w}-deci_ln))
-  out=""${w::$deci_ln}"."${w:$deci_ln}""
+  deci_ln=$((${#alfm_w}-deci_ln))
+  alfm_out=""${alfm_w::$deci_ln}"."${alfm_w:$deci_ln}""
   # handle neg sign
-  ((is_neg)) && out="-"$out""
-  print -r "$out"
+  ((is_neg)) && alfm_out="-"$alfm_out""
+  typeset -g "$outvar=$alfm_out"
 }
 
 ## arbitrarily large integer divider
