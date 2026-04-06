@@ -391,7 +391,7 @@ alfm() {
 
 ## arbitrarily large integer divider
 alid() {
-  local num1="$1" num2="$2" w out w1 w2 tmp prev_tmp
+  local num1="$1" num2="$2" outvar=${3:-al_return} alid_w out tmp prev_tmp
   local -i neg1 neg2 is_neg cmp
   [[ -z "$num1" || -z "$num2" ]] && return 1
   [[ "$num1" = '-0' ]] && num1=0
@@ -402,9 +402,9 @@ alid() {
   [[ "$num1" = '0' ]] && {
     al_rem=0
     [[ -z "$al_delim" ]] && {
-      print -r '0'
+      typeset -g "$outvar=0"
     } || {
-      print -r ""0"_"$al_rem""
+      typeset -g "$outvar=0_"$al_rem""
     }
     return 0
   }
@@ -423,25 +423,25 @@ alid() {
   ((cmp==2)) && {
     al_rem="$num1"
     [[ -z "$al_delim" ]] && {
-      print -r '0'
+      typeset -g "$outvar=0"
     } || {
-      print -r ""0"_"$al_rem""
+      typeset -g "$outvar=0_"$al_rem""
     }
     return 0
   }
   cmp=0
   # iterate num1 from l->r
   for ((i=1; i<=${#num1}; i++)); do
-    w=""$w""$num1[$i]""
+    alid_w=""$alid_w""$num1[$i]""
     # strip 0s
-    ((${#w}!=1)) && {
-      until [[ ${w::1} != '0' ]]; do
-        ((${#w}==1)) && break
-        w=${w:1}
+    ((${#alid_w}!=1)) && {
+      until [[ ${alid_w::1} != '0' ]]; do
+        ((${#alid_w}==1)) && break
+        alid_w=${alid_w:1}
       done
     }
     # if num2 > w, write 0
-    alcm "$w" "$num2"; cmp=$?
+    alcm "$alid_w" "$num2"; cmp=$?
     ((cmp==2)) && {
       out+="0"
       continue
@@ -450,15 +450,15 @@ alid() {
       tmp="0"
       for ((j=1; j>0; j++)); do
         prev_tmp="$tmp"
-        tmp=$(alia "$tmp" "$num2")
-        alcm "$tmp" "$w"; cmp=$?
+        alia "$tmp" "$num2" tmp
+        alcm "$tmp" "$alid_w"; cmp=$?
         ((cmp==1)) && {
           ((j--))
           out+="$j"
           break
         }
       done
-      w=$(alis "$w" "$prev_tmp")
+      alis "$alid_w" "$prev_tmp" alid_w
     }
   done
   # strip 0s from out
@@ -469,12 +469,12 @@ alid() {
   # set neg if needed
   ((is_neg)) && out="-"$out""
   # set remainder to al_rem
-  al_rem="$w"
+  al_rem="$alid_w"
   # output result
   [[ -z "$al_delim" ]] && {
-    print -r "$out"
+    typeset -g "$outvar=$out"
   } || {
-    print -r ""$out"_"$al_rem""
+    typeset -g "$outvar="$out"_"$al_rem""
   }
 }
 
@@ -529,14 +529,14 @@ alfd() {
   num1=""$n1_macro""$n1_micro""
   num2=""$n2_macro""$n2_micro""
   # perform macro divide
-  macro=$(al_delim=1 alid "$num1" "$num2")
+  al_delim=1 alid "$num1" "$num2" macro
   al_rem=${macro#*_}
   macro=${macro%%_*}
   # decimal loop
   for ((i=0; i<al_scale; i++)); do
     [[ "$al_rem" = '0' ]] && break
     al_rem=""$al_rem"0"
-    next_dig=$(al_delim=1 alid "$al_rem" "$num2")
+    al_delim=1 alid "$al_rem" "$num2" next_dig
     al_rem=${next_dig#*_}
     next_dig=${next_dig%%_*}
     micro+="$next_dig"
