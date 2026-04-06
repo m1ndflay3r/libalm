@@ -191,7 +191,7 @@ alis() {
 
 ## arbitrarily large float adder
 alfa() {
-  local num1="$1" num2="$2" num1_macro num1_micro num2_macro num2_micro macro micro out w10=1
+  local num1="$1" num2="$2" outvar=${3:-al_return} num1_macro num1_micro num2_macro num2_micro macro micro out w10=1
   local -i micro_ln carry_val pad_ln
   [[ -z "$num1" || -z "$num2" ]] && return 1
   [[ "$num1" != *"."* ]] && num1=""$num1".0"
@@ -201,11 +201,11 @@ alfa() {
   [[ "$num2" = '-0.0' ]] && num2=0.0
   # if one num is 0.0, answer is other num
   [[ "$num1" = '0.0' ]] && {
-    print -r "$num2"
+    typeset -g "$outvar=$num2"
     return 0
   }
   [[ "$num2" = '0.0' ]] && {
-    print -r "$num1"
+    typeset -g "$outvar=$num1"
     return 0
   }
   # separate n1 and n2 into micro+macro
@@ -225,57 +225,57 @@ alfa() {
   [[ ${num1_macro::1} = '-' ]] && num1_micro="-"$num1_micro""
   [[ ${num2_macro::1} = '-' ]] && num2_micro="-"$num2_micro""
   # add macro
-  macro=$(alia "$num1_macro" "$num2_macro")
+  alia "$num1_macro" "$num2_macro" macro
   # add micro, handle carry
-  micro=$(ret_carry=1 alia "$num1_micro" "$num2_micro")
+  ret_carry=1 alia "$num1_micro" "$num2_micro" micro
   carry_val=$?
   ((carry_val==1)) && {
     [[ ${macro::1} = '-' ]] && {
       macro=${macro:1}
-      macro=$(alia "$macro" 1)
+      alia "$macro" 1 macro
       macro="-"$macro""
     } || {
-      macro=$(alia "$macro" 1)
+      alia "$macro" 1 macro
     }
   }
   ((carry_val==3)) && {
     [[ ${macro::1} = '-' ]] && {
       macro=${macro:1}
-      macro=$(alia "$macro" -1)
+      alia "$macro" -1 macro
       macro="-"$macro""
     } || {
-      macro=$(alia "$macro" -1)
+      alia "$macro" -1 macro
     }
   }
   # handle fractional borrowing
   [[ ( ${macro::1} = '-' && ${micro::1} != '-' ) || ( ${micro::1} = '-' && ${macro::1} != '-' ) ]] && {
     [[ ${macro::1} = '-' ]] && {
       macro=${macro:1}
-      macro=$(alia "$macro" -1)
+      alia "$macro" -1 macro
       macro="-"$macro""
     } || {
-      macro=$(alia "$macro" -1)
+      alia "$macro" -1 macro
     }
     micro_ln=${#micro}
     pad_ln=$((micro_ln+1))
     w10="${(r:pad_ln::0:)w10}"
     [[ ${micro::1} = '-' ]] && {
-      micro=$(alia "$w10" "$micro")
+      alia "$w10" "$micro" micro
     } || {
       micro="-"$micro""
-      micro=$(alia "$w10" "$micro")
+      alia "$w10" "$micro" micro
     }
   }
   [[ ${micro::1} = '-' ]] && micro=${micro:1}
   # reassemble output
   out=""$macro"."$micro""
   [[ "$out" = "-0.0" ]] && out="0.0"
-  print -r "$out"
+  typeset -g "$outvar=$out"
 }
 
 ## arbitrarily large float subtractor
 alfs() {
-  local num1="$1" num2="$2"
+  local num1="$1" num2="$2" outvar=${3:-al_return}
   [[ -z "$num1" || -z "$num2" ]] && return 1
   # invert sign of 2nd num
   [[ ${num2::1} = '-' ]] && {
@@ -284,7 +284,7 @@ alfs() {
     num2="-"$num2""
   }
   # feed to alfa
-  alfa "$num1" "$num2"
+  alfa "$num1" "$num2" "$outvar"
 }
 
 ## arbitrarily large integer multiplier
