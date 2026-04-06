@@ -401,7 +401,11 @@ alid() {
   # if num1 is 0, result and remainder will always be 0
   [[ "$num1" = '0' ]] && {
     al_rem=0
-    print -r '0'
+    [[ -z "$al_delim" ]] && {
+      print -r '0'
+    } || {
+      print -r ""0"_"$al_rem""
+    }
     return 0
   }
   # handle negs
@@ -418,7 +422,11 @@ alid() {
   alcm "$num1" "$num2"; cmp=$?
   ((cmp==2)) && {
     al_rem="$num1"
-    print -r '0'
+    [[ -z "$al_delim" ]] && {
+      print -r '0'
+    } || {
+      print -r ""0"_"$al_rem""
+    }
     return 0
   }
   cmp=0
@@ -463,7 +471,11 @@ alid() {
   # set remainder to al_rem
   al_rem="$w"
   # output result
-  print -r "$out"
+  [[ -z "$al_delim" ]] && {
+    print -r "$out"
+  } || {
+    print -r ""$out"_"$al_rem""
+  }
 }
 
 ## arbitrarily large modulo
@@ -475,7 +487,7 @@ almo() {
 
 ## arbitrarily large float divider
 alfd() {
-  local num1="$1" num2="$2" n1_micro n2_micro n1_macro n2_macro al_rem macro micro al_scale=${al_scale:-50} next_dig out
+  local num1="$1" num2="$2" n1_micro n2_micro n1_macro n2_macro macro micro al_scale=${al_scale:-50} next_dig out al_rem
   local -i neg1 neg2 is_neg cmp deci_ln
   [[ -z "$num1" || -z "$num2" ]] && return 1
   # ensure valid float
@@ -517,12 +529,16 @@ alfd() {
   num1=""$n1_macro""$n1_micro""
   num2=""$n2_macro""$n2_micro""
   # perform macro divide
-  macro=$(alid "$num1" "$num2")
+  macro=$(al_delim=1 alid "$num1" "$num2")
+  al_rem=${macro#*_}
+  macro=${macro%%_*}
   # decimal loop
   for ((i=0; i<al_scale; i++)); do
     [[ "$al_rem" = '0' ]] && break
     al_rem=""$al_rem"0"
-    next_dig=$(alid "$al_rem" "$num2")
+    next_dig=$(al_delim=1 alid "$al_rem" "$num2")
+    al_rem=${next_dig#*_}
+    next_dig=${next_dig%%_*}
     micro+="$next_dig"
   done
   # reassembly
