@@ -487,7 +487,7 @@ almo() {
 
 ## arbitrarily large float divider
 alfd() {
-  local num1="$1" num2="$2" n1_micro n2_micro n1_macro n2_macro macro micro al_scale=${al_scale:-50} next_dig out al_rem
+  local num1="$1" num2="$2" n1_micro n2_micro n1_macro n2_macro macro micro al_scale=${al_scale:-20} next_dig out al_rem
   local -i neg1 neg2 is_neg cmp deci_ln
   [[ -z "$num1" || -z "$num2" ]] && return 1
   # ensure valid float
