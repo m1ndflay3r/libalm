@@ -76,8 +76,8 @@ alcm() {
 ## arbitrarily large integer adder
 alia() {
   # take input as strings
-  local num1="$1" num2="$2" outvar=${3:-al_return} working out temp i
-  local -i num_ln neg1 neg2 is_sub sign w c b
+  local num1="$1" num2="$2" outvar=${3:-al_return} working out temp
+  local -i num_ln neg1 neg2 is_sub sign w c b i
   [[ -z "$num1" || -z "$num2" ]] && return 1
   # treat 0 and -0 the same
   [[ "$num1" = '-0' ]] && num1=0
@@ -291,8 +291,8 @@ alfs() {
 
 ## arbitrarily large integer multiplier
 alim() {
-  local num1="$1" num2="$2" alim_out='0' outvar=${3:-al_return} w1 w2 w carry='0' row='' j k
-  local -i neg1 neg2 is_neg shft carryln row_ln
+  local num1="$1" num2="$2" alim_out='0' outvar=${3:-al_return} w1 w2 w carry='0' row=''
+  local -i neg1 neg2 is_neg shft carryln row_ln j k
   [[ -z "$num1" || -z "$num2" ]] && return 1
   # handle multiply by zero
   [[ "$num1" = "0" || "$num2" = "0" || "$num1" = "-0" || "$num2" = "-0" ]] && {
@@ -393,8 +393,8 @@ alfm() {
 
 ## arbitrarily large integer divider
 alid() {
-  local num1="$1" num2="$2" outvar=${3:-al_return} alid_w out tmp prev_tmp l m
-  local -i neg1 neg2 is_neg cmp
+  local num1="$1" num2="$2" outvar=${3:-al_return} alid_w out tmp prev_tmp
+  local -i neg1 neg2 is_neg cmp l m
   [[ -z "$num1" || -z "$num2" ]] && return 1
   [[ "$num1" = '-0' ]] && num1=0
   [[ "$num2" = '-0' ]] && num2=0
@@ -489,8 +489,8 @@ almo() {
 
 ## arbitrarily large float divider
 alfd() {
-  local num1="$1" num2="$2" outvar=${3:-al_return} n1_micro n2_micro n1_macro n2_macro macro micro al_scale=${al_scale:-20} next_dig out al_rem n
-  local -i neg1 neg2 is_neg cmp deci_ln
+  local num1="$1" num2="$2" outvar=${3:-al_return} n1_micro n2_micro n1_macro n2_macro macro micro al_scale=${al_scale:-20} next_dig out al_rem
+  local -i neg1 neg2 is_neg cmp deci_ln n
   [[ -z "$num1" || -z "$num2" ]] && return 1
   # ensure valid float
   [[ "$num1" != *"."* ]] && num1=""$num1".0"
@@ -554,9 +554,10 @@ alfd() {
 #### conversion functions ####
 
 dat2bin() {
-  local working="$1" outvar=${2:-al_return} out char z
-  for ((z=1; z<=${#working}; z++)); do
-    char=$working[$z]
+  local working="$1" outvar=${2:-al_return} out char
+  local -i o
+  for ((o=1; o<=${#working}; o++)); do
+    char=$working[$o]
     print -v char -n -- ${(l{8}{0})$(([##2]#char))}
     out+="$char"
   done
@@ -564,9 +565,10 @@ dat2bin() {
 }
 
 bin2dat() {
-  local working="$1" char out outvar=${2:-al_return} x
-  for ((x=0; x<${#working}; x+=8)); do
-    char=${working:$x:8}
+  local working="$1" char out outvar=${2:-al_return}
+  local -i p
+  for ((p=0; p<${#working}; p+=8)); do
+    char=${working:$p:8}
     print -v char -n -- "\x"${(l{2}{0})$(([##16]2#$char))}""
     out+="$char"
   done
@@ -574,6 +576,87 @@ bin2dat() {
 }
 
 bin2hex() {
+  local bin="$1" outvar=${2:-al_return} out="" w hex
+  local -i q b2h_rem pad_ln
+  [[ -z "$bin" ]] && return 1
+  # determine if padding is needed to make length a multiple of 4
+  b2h_rem=$((${#bin}%4))
+  ((b2h_rem)) && {
+    pad_ln=$((${#bin}+4 - b2h_rem))
+    bin="${(l:pad_ln::0:)bin}"
+  }
+  # read in 4-byte chunks
+  for ((q=0; q<${#bin}; q+=4)); do
+    w=${bin:$q:4}
+    case "$w" in
+      (0000) hex="0" ;;
+      (0001) hex="1" ;;
+      (0010) hex="2" ;;
+      (0011) hex="3" ;;
+      (0100) hex="4" ;;
+      (0101) hex="5" ;;
+      (0110) hex="6" ;;
+      (0111) hex="7" ;;
+      (1000) hex="8" ;;
+      (1001) hex="9" ;;
+      (1010) hex="a" ;;
+      (1011) hex="b" ;;
+      (1100) hex="c" ;;
+      (1101) hex="d" ;;
+      (1110) hex="e" ;;
+      (1111) hex="f" ;;
+    esac
+    out+="$hex"
+  done
+  # strip leading zeros
+  [[ ${out::1} = '0' ]] && {
+    until [[ ${out::1} != '0' ]]; do
+      ((${#out}==1)) && break
+      out=${out:1}
+    done
+  }
+  eval "$outvar=\"\$out\""
+}
+
+hex2bin() {
+  local hex="$1" outvar=${2:-al_return} w bin out
+  local -i r
+  [[ -z "$hex" ]] && return 1
+  ((pad)) && hex="0"$hex""
+  # loop over hex, conv to bin
+  for ((r=0; r<${#hex}; r++)); do
+    w=${hex:$r:1}
+    case "$w" in
+      (0) bin="0000" ;;
+      (1) bin="0001" ;;
+      (2) bin="0010" ;;
+      (3) bin="0011" ;;
+      (4) bin="0100" ;;
+      (5) bin="0101" ;;
+      (6) bin="0110" ;;
+      (7) bin="0111" ;;
+      (8) bin="1000" ;;
+      (9) bin="1001" ;;
+      (a|A) bin="1010" ;;
+      (b|B) bin="1011" ;;
+      (c|C) bin="1100" ;;
+      (d|D) bin="1101" ;;
+      (e|E) bin="1110" ;;
+      (f|F) bin="1111" ;;
+    esac
+    out+="$bin"
+  done
+  # strip leading zeros
+  [[ ${out::1} = '0' ]] && {
+    until [[ ${out::1} != '0' ]]; do
+      ((${#out}==1)) && break
+      out=${out:1}
+    done
+  }
+  eval "$outvar=\"\$out\""
+}
+
+dec2bin() {
 }
 
 bin2dec() {
@@ -583,12 +666,6 @@ hex2dec() {
 }
 
 dec2hex() {
-}
-
-dec2bin() {
-}
-
-hex2bin() {
 }
 
 #### logic functions ####
