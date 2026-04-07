@@ -1,5 +1,7 @@
 #!/usr/bin/env zsh
 
+#### arithmetic functions ####
+
 ## arbitrarily large comparator
 alcm() {
   local num1="$1" num2="$2" n1_macro n1_micro n2_macro n2_micro w1 w2 micro_ln num_ln
@@ -547,4 +549,37 @@ alfd() {
   ((is_neg)) && out="-"$out""
   # output result
   eval "$outvar=\"\$out\""
+}
+
+#### conversion functions ####
+
+dat2bin() {
+}
+
+bin2dat() {
+}
+
+bin2hex() {
+}
+
+bin2dec() {
+}
+
+hex2dec() {
+}
+
+dec2hex() {
+}
+
+dec2bin() {
+}
+
+hex2bin() {
+}
+
+#### logic functions ####
+
+## arbitrarily large bitmask
+
+albm() {
 }
