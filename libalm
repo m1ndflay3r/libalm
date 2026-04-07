@@ -554,9 +554,24 @@ alfd() {
 #### conversion functions ####
 
 dat2bin() {
+  local working="$1" outvar=${2:-al_return} out char z
+  for ((z=1; z<=${#working}; z++)); do
+    char=$working[$z]
+    print -v char -n -- ${(l{8}{0})$(([##2]#char))}
+    out+="$char"
+  done
+  eval "$outvar=\"\$out\""
 }
 
 bin2dat() {
+  local working="$1" char out outvar=${2:-al_return}
+  while true; do
+    char=${working::8}; [ -z "$char" ] && break
+    working=${working:8}
+    print -v char -n -- "\x"${(l{2}{0})$(([##16]2#$char))}""
+    out+="$char"
+  done
+  eval "$outvar=\"\$out\""
 }
 
 bin2hex() {
