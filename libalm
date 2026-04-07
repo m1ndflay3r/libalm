@@ -579,7 +579,54 @@ hex2bin() {
 
 #### logic functions ####
 
-## arbitrarily large bitmask
-
+## bitmask
 albm() {
+}
+
+## rotate right
+rrot() {
+}
+
+## rotate left
+lrot() {
+}
+
+## shift right
+rshft() {
+}
+
+## shift left
+lshft() {
+}
+
+## bitwise AND
+aland() {
+}
+
+## bitwise OR
+alor() {
+}
+
+## bitwise XAND
+alxand() {
+}
+
+## bitwise XOR
+alxor() {
+}
+
+## bitwise NAND
+alnand() {
+}
+
+## bitwise NOR
+alnor() {
+}
+
+## bitwise XNOR
+alxnor() {
+}
+
+## bitwise NOT
+alnot() {
 }
