@@ -1,7 +1,10 @@
 *libalm* is an arbitrary-precision / bignum mathematics library written in pure zsh, for use anywhere a signed 64-bit integer just isnt big enough.
 
 
-Usage:
+----------------------
+
+
+_Usage:_
 
 
     alcm <num1> <num2>
