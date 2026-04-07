@@ -123,7 +123,7 @@ alia() {
     }
   }
   # if both are neg, output is neg
-  (((neg1)) && ((neg2))) && ((sign++))
+  ((neg1)) && ((neg2)) && ((sign++))
   # begin iteration over nums
   for ((i=num_ln; i>0; i--)); do
     ((is_sub)) && {
@@ -151,7 +151,7 @@ alia() {
     out=""$w""$out""
   done
   # add last carry if needed
-  (((c)) && [[ -z "$ret_carry" ]]) && out="1"$out""
+  ((c)) && [[ -z "$ret_carry" ]] && out="1"$out""
   # strip unneeded zeros
   [[ ${out::1} = 0 ]] && {
     until [[ ${out::1} != '0' ]]; do
