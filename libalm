@@ -607,10 +607,6 @@ aland() {
 alor() {
 }
 
-## bitwise XAND
-alxand() {
-}
-
 ## bitwise XOR
 alxor() {
 }
