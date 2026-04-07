@@ -1,4 +1,4 @@
-*libalm* is an arbitrary-precision / bignum mathematics library written in pure zsh, for use anywhere a signed 64-bit int just isnt big enough.
+*libalm* is an arbitrary-precision / bignum mathematics library written in pure zsh, for use anywhere a signed 64-bit integer just isnt big enough.
 
 
 Usage:
