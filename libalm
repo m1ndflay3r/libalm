@@ -22,8 +22,8 @@ alcm() {
     num2=${num2:1}
   }
   # if one num is neg but the other isnt we have our answer
-  (((neg1)) && ! ((neg2))) && return 2
-  (((neg2)) && ! ((neg1))) && return 1
+  ((neg1)) && ! ((neg2)) && return 2
+  ((neg2)) && ! ((neg1)) && return 1
   # strip leading zeros
   [[ ${num1::1} = 0 ]] && {
     until [[ ${num1::1} != '0' ]]; do
