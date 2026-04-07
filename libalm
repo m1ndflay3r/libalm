@@ -564,12 +564,12 @@ dat2bin() {
 }
 
 bin2dat() {
-  local working="$1" char out outvar=${2:-al_return}
-  while true; do
-    char=${working::8}; [ -z "$char" ] && break
-    working=${working:8}
+  local working="$1" char out outvar=${2:-al_return} x prev_x=0
+  for ((x=8; x<=${#working}; x+=8)); do
+    char=${working::$x}; char=${char:$prev_x}
     print -v char -n -- "\x"${(l{2}{0})$(([##16]2#$char))}""
     out+="$char"
+    prev_x=$x
   done
   eval "$outvar=\"\$out\""
 }
