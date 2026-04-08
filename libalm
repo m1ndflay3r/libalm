@@ -703,26 +703,25 @@ dec2hex() {
 
 ## bitmask
 albm() {
-  local num="$1" mask="$2" outvar=${3:-al_return} cmp albm_out albm_w
-  [[ -z "$num" || -z "$mask" ]] && return 1
-  alcm "$num" "$mask"; cmp=$?
+  local bm_num="$1" mask="$2" outvar=${3:-al_return} cmp
+  [[ -z "$bm_num" || -z "$mask" ]] && return 1
+  [[ -z "$hexmask" ]] && local -i hexmask
+  ((hexmask)) && hex2dec "$mask" mask
+  alcm "$bm_num" "$mask"; cmp=$?
   [[ "$cmp" = "3" ]] && {
-    eval "$outvar=\"\$num\""
+    eval "$outvar=\"\$bm_num\""
     return 0
   }
   alia "$mask" 1 mask
-  [[ ${num::1} = '-' ]] && {
-    alia "$mask" "$num" albm_w
-    [[ ${albm_w::1} = '-' ]] && {
-      until [[ ${albm_w::1} != '-' ]]; do
-        alia "$mask" "$albm_w" albm_w
-      done
-    }
-    eval "$outvar=\"\$albm_w\""
+  [[ ${bm_num::1} = '-' ]] && {
+    until [[ ${bm_num::1} != '-' ]]; do
+      alia "$mask" "$bm_num" bm_num
+    done
+    eval "$outvar=\"\$bm_num\""
     return 0
   } || {
-    almo "$num" "$mask" albm_w
-    eval "$outvar=\"\$albm_w\""
+    almo "$bm_num" "$mask" bm_num
+    eval "$outvar=\"\$bm_num\""
     return 0
   }
 }
