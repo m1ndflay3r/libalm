@@ -801,15 +801,15 @@ alxor() {
   dat2bin "$num1" num1
   dat2bin "$num2" num2
   # 0-pad to maxln if needed
-  ((${#num1}>${#num2)) && {
+  ((${#num1}>${#num2})) && {
     pad_ln=${#num1}
     num2="${(l:pad_ln::0:)num2}"
   }
-  ((${#num1}<${#num2)) && {
+  ((${#num1}<${#num2})) && {
     pad_ln=${#num2}
     num1="${(l:pad_ln::0:)num1}"
   }
-  ((${#num1}==${#num2)) && pad_ln=${#num1}
+  ((${#num1}==${#num2})) && pad_ln=${#num1}
   # loop through bits
   for ((v=1; v<=pad_ln; v++)); do
     [[ $num1[$v] != $num2[$v] ]] && {
@@ -830,15 +830,15 @@ alxnor() {
   dat2bin "$num1" num1
   dat2bin "$num2" num2
   # 0-pad to maxln if needed
-  ((${#num1}>${#num2)) && {
+  ((${#num1}>${#num2})) && {
     pad_ln=${#num1}
     num2="${(l:pad_ln::0:)num2}"
   }
-  ((${#num1}<${#num2)) && {
+  ((${#num1}<${#num2})) && {
     pad_ln=${#num2}
     num1="${(l:pad_ln::0:)num1}"
   }
-  ((${#num1}==${#num2)) && pad_ln=${#num1}
+  ((${#num1}==${#num2})) && pad_ln=${#num1}
   # loop through bits
   for ((v=1; v<=pad_ln; v++)); do
     [[ $num1[$v] = $num2[$v] ]] && {
@@ -859,15 +859,15 @@ aland() {
   dat2bin "$num1" num1
   dat2bin "$num2" num2
   # 0-pad to maxln if needed
-  ((${#num1}>${#num2)) && {
+  ((${#num1}>${#num2})) && {
     pad_ln=${#num1}
     num2="${(l:pad_ln::0:)num2}"
   }
-  ((${#num1}<${#num2)) && {
+  ((${#num1}<${#num2})) && {
     pad_ln=${#num2}
     num1="${(l:pad_ln::0:)num1}"
   }
-  ((${#num1}==${#num2)) && pad_ln=${#num1}
+  ((${#num1}==${#num2})) && pad_ln=${#num1}
   # loop through bits
   for ((v=1; v<=pad_ln; v++)); do
     [[ $num1[$v] = '1' && $num2[$v] = '1' ]] && {
@@ -888,15 +888,15 @@ alor() {
   dat2bin "$num1" num1
   dat2bin "$num2" num2
   # 0-pad to maxln if needed
-  ((${#num1}>${#num2)) && {
+  ((${#num1}>${#num2})) && {
     pad_ln=${#num1}
     num2="${(l:pad_ln::0:)num2}"
   }
-  ((${#num1}<${#num2)) && {
+  ((${#num1}<${#num2})) && {
     pad_ln=${#num2}
     num1="${(l:pad_ln::0:)num1}"
   }
-  ((${#num1}==${#num2)) && pad_ln=${#num1}
+  ((${#num1}==${#num2})) && pad_ln=${#num1}
   # loop through bits
   for ((v=1; v<=pad_ln; v++)); do
     [[ $num1[$v] = '1' || $num2[$v] = '1' ]] && {
@@ -917,15 +917,15 @@ alnor() {
   dat2bin "$num1" num1
   dat2bin "$num2" num2
   # 0-pad to maxln if needed
-  ((${#num1}>${#num2)) && {
+  ((${#num1}>${#num2})) && {
     pad_ln=${#num1}
     num2="${(l:pad_ln::0:)num2}"
   }
-  ((${#num1}<${#num2)) && {
+  ((${#num1}<${#num2})) && {
     pad_ln=${#num2}
     num1="${(l:pad_ln::0:)num1}"
   }
-  ((${#num1}==${#num2)) && pad_ln=${#num1}
+  ((${#num1}==${#num2})) && pad_ln=${#num1}
   # loop through bits
   for ((v=1; v<=pad_ln; v++)); do
     [[ $num1[$v] = '0' && $num2[$v] = '0' ]] && {
@@ -946,15 +946,15 @@ alnand() {
   dat2bin "$num1" num1
   dat2bin "$num2" num2
   # 0-pad to maxln if needed
-  ((${#num1}>${#num2)) && {
+  ((${#num1}>${#num2})) && {
     pad_ln=${#num1}
     num2="${(l:pad_ln::0:)num2}"
   }
-  ((${#num1}<${#num2)) && {
+  ((${#num1}<${#num2})) && {
     pad_ln=${#num2}
     num1="${(l:pad_ln::0:)num1}"
   }
-  ((${#num1}==${#num2)) && pad_ln=${#num1}
+  ((${#num1}==${#num2})) && pad_ln=${#num1}
   # loop through bits
   for ((v=1; v<=pad_ln; v++)); do
     [[ $num1[$v] = '0' || $num2[$v] = '0' ]] && {
