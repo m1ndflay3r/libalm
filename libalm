@@ -740,10 +740,21 @@ albm() {
 
 ## rotate right
 rrot() {
+  local rrot_w="$1" rot_c=${2:-1} outvar=${3:-al_return} rot_ln
+  local -i t
+  [[ -z "$rrot_w" ]] && return 1
+  dat2bin "$rrot_w" rrot_w
+  alis "${#rrot_w}" "1" rot_ln
+  for ((t=0; t<rot_c; t++)); do
+    rrot_w=""${rrot_w:$rot_ln}""${rrot_w::$rot_ln}""
+  done
+  bin2dat "$rrot_w" rrot_w
+  eval "$outvar=\"\$rrot_w\""
 }
 
 ## rotate left
 lrot() {
+
 }
 
 ## shift right
