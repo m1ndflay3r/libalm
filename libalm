@@ -670,12 +670,33 @@ bin2dec() {
 }
 
 dec2bin() {
+  local dec="$1" tmp_dec="$1" outvar=${2:-al_return} d2b_out d2b_rem
+  [[ -z "$dec" ]] && return 1
+  [[ "$dec" = '0' ]] && {
+    eval "$outvar=\"0\""
+    return 0
+  }
+  while [[ "$tmp_dec" != '0' ]]; do
+    al_delim=1 alid "$tmp_dec" "2" tmp_dec
+    d2b_rem=${tmp_dec#*_}
+    tmp_dec=${tmp_dec%%_*}
+    d2b_out=""$d2b_rem""$d2b_out""
+  done
+  eval "$outvar=\"\$d2b_out\""
 }
 
 hex2dec() {
+  local hex="$1" outvar=${2:-al_return} h2d_tmp
+  [[ -z "$hex" ]] && return 1
+  hex2bin "$hex" h2d_tmp
+  bin2dec "$h2d_tmp" "$outvar"
 }
 
 dec2hex() {
+  local dec="$1" outvar=${2:-al_return} d2h_tmp
+  [[ -z "$dec" ]] && return 1
+  dec2bin "$dec" d2h_tmp
+  bin2hex "$d2h_tmp" "$outvar"
 }
 
 #### logic functions ####
