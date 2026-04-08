@@ -822,6 +822,36 @@ alxor() {
   bin2dat "$out" "$outvar"
 }
 
+## bitwise XNOR
+alxnor() {
+  local num1="$1" num2="$2" outvar=${3:-al_return} cmp out
+  local -i v pad_ln
+  [[ -z "$num1" || -z "$num2" ]] && return 1
+  # conv to binary
+  dat2bin "$num1" num1
+  dat2bin "$num2" num2
+  # 0-pad to maxln if needed
+  alcm "$num1" "$num2"; cmp=$?
+  [[ "$cmp" = "1" ]] && {
+    pad_ln=${#num1}
+    num2="${(l:pad_ln::0:)num2}"
+  }
+  [[ "$cmp" = "2" ]] && {
+    pad_ln=${#num2}
+    num1="${(l:pad_ln::0:)num1}"
+  }
+  [[ "$cmp" = "3" ]] && pad_ln=${#num1}
+  # loop through bits
+  for ((v=1; v<=pad_ln; v++)); do
+    [[ $num1[$v] = $num2[$v] ]] && {
+      out+='1'
+    } || {
+      out+='0'
+    }
+  done
+  bin2dat "$out" "$outvar"
+}
+
 ## bitwise AND
 aland() {
   local num1="$1" num2="$2" outvar=${3:-al_return} cmp out
@@ -884,16 +914,76 @@ alor() {
 
 ## bitwise NAND
 alnand() {
+  local num1="$1" num2="$2" outvar=${3:-al_return} cmp out
+  local -i v pad_ln
+  [[ -z "$num1" || -z "$num2" ]] && return 1
+  # conv to binary
+  dat2bin "$num1" num1
+  dat2bin "$num2" num2
+  # 0-pad to maxln if needed
+  alcm "$num1" "$num2"; cmp=$?
+  [[ "$cmp" = "1" ]] && {
+    pad_ln=${#num1}
+    num2="${(l:pad_ln::0:)num2}"
+  }
+  [[ "$cmp" = "2" ]] && {
+    pad_ln=${#num2}
+    num1="${(l:pad_ln::0:)num1}"
+  }
+  [[ "$cmp" = "3" ]] && pad_ln=${#num1}
+  # loop through bits
+  for ((v=1; v<=pad_ln; v++)); do
+    [[ $num1[$v] = '0' && $num2[$v] = '0' ]] && {
+      out+='1'
+    } || {
+      out+='0'
+    }
+  done
+  bin2dat "$out" "$outvar"
 }
 
 ## bitwise NOR
 alnor() {
-}
-
-## bitwise XNOR
-alxnor() {
+  local num1="$1" num2="$2" outvar=${3:-al_return} cmp out
+  local -i v pad_ln
+  [[ -z "$num1" || -z "$num2" ]] && return 1
+  # conv to binary
+  dat2bin "$num1" num1
+  dat2bin "$num2" num2
+  # 0-pad to maxln if needed
+  alcm "$num1" "$num2"; cmp=$?
+  [[ "$cmp" = "1" ]] && {
+    pad_ln=${#num1}
+    num2="${(l:pad_ln::0:)num2}"
+  }
+  [[ "$cmp" = "2" ]] && {
+    pad_ln=${#num2}
+    num1="${(l:pad_ln::0:)num1}"
+  }
+  [[ "$cmp" = "3" ]] && pad_ln=${#num1}
+  # loop through bits
+  for ((v=1; v<=pad_ln; v++)); do
+    [[ $num1[$v] = '0' || $num2[$v] = '0' ]] && {
+      out+='1'
+    } || {
+      out+='0'
+    }
+  done
+  bin2dat "$out" "$outvar"
 }
 
 ## bitwise NOT
 alnot() {
+  local num="$1" outvar=${2:-al_return} out
+  local -i w
+  [[ -z "$num" ]] && return 1
+  dat2bin "$num" num
+  for ((w=1; w<=${#num}; w++)); do
+    [[ $num[$w] = '0' ]] && {
+      out+='1'
+    } || {
+      out+='0'
+    }
+  done
+  bin2dat "$out" "$outvar"
 }
