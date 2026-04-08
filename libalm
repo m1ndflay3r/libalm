@@ -580,9 +580,9 @@ bin2hex() {
   local -i q b2h_rem pad_ln
   [[ -z "$bin" ]] && return 1
   # determine if padding is needed to make length a multiple of 4
-  almo ${#bin} 4 b2h_rem
+  b2h_rem=$((${#bin}%4))
   ((b2h_rem)) && {
-    alia ${#bin} 4 pad_ln; alis $pad_ln $b2h_rem pad_ln
+    pad_ln=$((${#bin}+4 - b2h_rem))
     bin="${(l:pad_ln::0:)bin}"
   }
   # read in 4-byte chunks
