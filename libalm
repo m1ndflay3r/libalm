@@ -703,6 +703,34 @@ dec2hex() {
 
 ## bitmask
 albm() {
+  local num="$1" mask="$2" outvar=${3:-al_return} cmp albm_out albm_w
+  local -i is_neg
+  [[ -z "$num" || -z "$mask" ]] && return 1
+  # handle neg sign
+  [[ ${num::1} = '-' ]] && {
+    ((is_neg++))
+    num=${num:1}
+  }
+  alcm "$num" "$mask"; cmp=$?
+  ! ((is_neg)) && [[ "$cmp" = "3" ]] && {
+    eval "$outvar=\"\$num\""
+    return 0
+  }
+  alia "$mask" 1 mask
+  ((is_neg)) && {
+    alis "$mask" "$num" albm_w
+    [[ ${albm_w::1} = '-' ]] && {
+      until [[ ${albm_w::1} != '-' ]]; do
+        alia "$mask" "$albm_w" albm_w
+      done
+    }
+    eval "$outvar=\"\$albm_w\""
+    return 0
+  } || {
+    almo "$num" "$mask" albm_w
+    eval "$outvar=\"\$albm_w\""
+    return 0
+  }
 }
 
 ## rotate right
