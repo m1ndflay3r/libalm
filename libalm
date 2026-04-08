@@ -912,8 +912,8 @@ alor() {
   bin2dat "$out" "$outvar"
 }
 
-## bitwise NAND
-alnand() {
+## bitwise NOR
+alnor() {
   local num1="$1" num2="$2" outvar=${3:-al_return} cmp out
   local -i v pad_ln
   [[ -z "$num1" || -z "$num2" ]] && return 1
@@ -942,8 +942,8 @@ alnand() {
   bin2dat "$out" "$outvar"
 }
 
-## bitwise NOR
-alnor() {
+## bitwise NAND
+alnand() {
   local num1="$1" num2="$2" outvar=${3:-al_return} cmp out
   local -i v pad_ln
   [[ -z "$num1" || -z "$num2" ]] && return 1
