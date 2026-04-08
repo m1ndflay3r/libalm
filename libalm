@@ -580,9 +580,9 @@ bin2hex() {
   local -i q b2h_rem pad_ln
   [[ -z "$bin" ]] && return 1
   # determine if padding is needed to make length a multiple of 4
-  b2h_rem=$((${#bin}%4))
+  almo ${#bin} 4 b2h_rem
   ((b2h_rem)) && {
-    pad_ln=$((${#bin}+4 - b2h_rem))
+    alia ${#bin} 4 pad_ln; alis $pad_ln $b2h_rem pad_ln
     bin="${(l:pad_ln::0:)bin}"
   }
   # read in 4-byte chunks
@@ -605,6 +605,7 @@ bin2hex() {
       (1101) hex="d" ;;
       (1110) hex="e" ;;
       (1111) hex="f" ;;
+      (*) return 1 ;;
     esac
     out+="$hex"
   done
@@ -622,7 +623,6 @@ hex2bin() {
   local hex="$1" outvar=${2:-al_return} w bin out
   local -i r
   [[ -z "$hex" ]] && return 1
-  ((pad)) && hex="0"$hex""
   # loop over hex, conv to bin
   for ((r=0; r<${#hex}; r++)); do
     w=${hex:$r:1}
@@ -643,6 +643,7 @@ hex2bin() {
       (d|D) bin="1101" ;;
       (e|E) bin="1110" ;;
       (f|F) bin="1111" ;;
+      (*) return 1 ;;
     esac
     out+="$bin"
   done
@@ -656,10 +657,19 @@ hex2bin() {
   eval "$outvar=\"\$out\""
 }
 
-dec2bin() {
+bin2dec() {
+  local bin="$1" outvar=${2:-al_return} char b2d_out=0
+  local -i s
+  [[ -z "$bin" ]] && return 1
+  for ((s=1; s<=${#bin}; s++)); do
+    char=$bin[$s]
+    alia "$b2d_out" "$b2d_out" b2d_out
+    [[ "$char" = 1 ]] && alia "$b2d_out" "1" b2d_out
+  done
+  eval "$outvar=\"\$b2d_out\""
 }
 
-bin2dec() {
+dec2bin() {
 }
 
 hex2dec() {
