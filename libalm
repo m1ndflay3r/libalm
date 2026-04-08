@@ -717,7 +717,7 @@ albm() {
   }
   ! [[ -z "$hexmask" ]] && hex2dec "$mask" mask
   alcm "$bm_num" "$mask"; cmp=$?
-  [[ "$cmp" = "3" ]] && {
+  ((cmp==3)) && {
     ((is_neg)) && [[ "$bm_num" != '0' ]] && bm_num="-"$bm_num""
     eval "$outvar=\"\$bm_num\""
     return 0
@@ -740,11 +740,11 @@ albm() {
 
 ## rotate right
 rrot() {
-  local rrot_w="$1" rot_c=${2:-1} outvar=${3:-al_return} rot_ln
-  local -i t
+  local rrot_w="$1" rot_c=${2:-1} outvar=${3:-al_return}
+  local -i t rot_ln
   [[ -z "$rrot_w" ]] && return 1
   dat2bin "$rrot_w" rrot_w
-  alis "${#rrot_w}" "1" rot_ln
+  rot_ln=$((${#rrot_w}-1))
   for ((t=0; t<rot_c; t++)); do
     rrot_w=""${rrot_w:$rot_ln}""${rrot_w::$rot_ln}""
   done
@@ -767,11 +767,11 @@ lrot() {
 
 ## shift right
 rshft() {
-  local rshft_w="$1" shft_c=${2:-1} outvar=${3:-al_return} shft_ln
-  local -i t
+  local rshft_w="$1" shft_c=${2:-1} outvar=${3:-al_return}
+  local -i t shft_ln
   [[ -z "$rshft_w" ]] && return 1
   dat2bin "$rshft_w" rshft_w
-  alis "${#rshft_w}" "1" shft_ln
+  shft_ln=$((${#rshft_w}-1))
   for ((t=0; t<shft_c; t++)); do
     rshft_w="0"${rshft_w::$shft_ln}""
   done
@@ -801,16 +801,15 @@ alxor() {
   dat2bin "$num1" num1
   dat2bin "$num2" num2
   # 0-pad to maxln if needed
-  alcm "$num1" "$num2"; cmp=$?
-  [[ "$cmp" = "1" ]] && {
+  ((${#num1}>${#num2)) && {
     pad_ln=${#num1}
     num2="${(l:pad_ln::0:)num2}"
   }
-  [[ "$cmp" = "2" ]] && {
+  ((${#num1}<${#num2)) && {
     pad_ln=${#num2}
     num1="${(l:pad_ln::0:)num1}"
   }
-  [[ "$cmp" = "3" ]] && pad_ln=${#num1}
+  ((${#num1}==${#num2)) && pad_ln=${#num1}
   # loop through bits
   for ((v=1; v<=pad_ln; v++)); do
     [[ $num1[$v] != $num2[$v] ]] && {
@@ -831,16 +830,15 @@ alxnor() {
   dat2bin "$num1" num1
   dat2bin "$num2" num2
   # 0-pad to maxln if needed
-  alcm "$num1" "$num2"; cmp=$?
-  [[ "$cmp" = "1" ]] && {
+  ((${#num1}>${#num2)) && {
     pad_ln=${#num1}
     num2="${(l:pad_ln::0:)num2}"
   }
-  [[ "$cmp" = "2" ]] && {
+  ((${#num1}<${#num2)) && {
     pad_ln=${#num2}
     num1="${(l:pad_ln::0:)num1}"
   }
-  [[ "$cmp" = "3" ]] && pad_ln=${#num1}
+  ((${#num1}==${#num2)) && pad_ln=${#num1}
   # loop through bits
   for ((v=1; v<=pad_ln; v++)); do
     [[ $num1[$v] = $num2[$v] ]] && {
@@ -861,16 +859,15 @@ aland() {
   dat2bin "$num1" num1
   dat2bin "$num2" num2
   # 0-pad to maxln if needed
-  alcm "$num1" "$num2"; cmp=$?
-  [[ "$cmp" = "1" ]] && {
+  ((${#num1}>${#num2)) && {
     pad_ln=${#num1}
     num2="${(l:pad_ln::0:)num2}"
   }
-  [[ "$cmp" = "2" ]] && {
+  ((${#num1}<${#num2)) && {
     pad_ln=${#num2}
     num1="${(l:pad_ln::0:)num1}"
   }
-  [[ "$cmp" = "3" ]] && pad_ln=${#num1}
+  ((${#num1}==${#num2)) && pad_ln=${#num1}
   # loop through bits
   for ((v=1; v<=pad_ln; v++)); do
     [[ $num1[$v] = '1' && $num2[$v] = '1' ]] && {
@@ -891,16 +888,15 @@ alor() {
   dat2bin "$num1" num1
   dat2bin "$num2" num2
   # 0-pad to maxln if needed
-  alcm "$num1" "$num2"; cmp=$?
-  [[ "$cmp" = "1" ]] && {
+  ((${#num1}>${#num2)) && {
     pad_ln=${#num1}
     num2="${(l:pad_ln::0:)num2}"
   }
-  [[ "$cmp" = "2" ]] && {
+  ((${#num1}<${#num2)) && {
     pad_ln=${#num2}
     num1="${(l:pad_ln::0:)num1}"
   }
-  [[ "$cmp" = "3" ]] && pad_ln=${#num1}
+  ((${#num1}==${#num2)) && pad_ln=${#num1}
   # loop through bits
   for ((v=1; v<=pad_ln; v++)); do
     [[ $num1[$v] = '1' || $num2[$v] = '1' ]] && {
@@ -921,16 +917,15 @@ alnor() {
   dat2bin "$num1" num1
   dat2bin "$num2" num2
   # 0-pad to maxln if needed
-  alcm "$num1" "$num2"; cmp=$?
-  [[ "$cmp" = "1" ]] && {
+  ((${#num1}>${#num2)) && {
     pad_ln=${#num1}
     num2="${(l:pad_ln::0:)num2}"
   }
-  [[ "$cmp" = "2" ]] && {
+  ((${#num1}<${#num2)) && {
     pad_ln=${#num2}
     num1="${(l:pad_ln::0:)num1}"
   }
-  [[ "$cmp" = "3" ]] && pad_ln=${#num1}
+  ((${#num1}==${#num2)) && pad_ln=${#num1}
   # loop through bits
   for ((v=1; v<=pad_ln; v++)); do
     [[ $num1[$v] = '0' && $num2[$v] = '0' ]] && {
@@ -951,16 +946,15 @@ alnand() {
   dat2bin "$num1" num1
   dat2bin "$num2" num2
   # 0-pad to maxln if needed
-  alcm "$num1" "$num2"; cmp=$?
-  [[ "$cmp" = "1" ]] && {
+  ((${#num1}>${#num2)) && {
     pad_ln=${#num1}
     num2="${(l:pad_ln::0:)num2}"
   }
-  [[ "$cmp" = "2" ]] && {
+  ((${#num1}<${#num2)) && {
     pad_ln=${#num2}
     num1="${(l:pad_ln::0:)num1}"
   }
-  [[ "$cmp" = "3" ]] && pad_ln=${#num1}
+  ((${#num1}==${#num2)) && pad_ln=${#num1}
   # loop through bits
   for ((v=1; v<=pad_ln; v++)); do
     [[ $num1[$v] = '0' || $num2[$v] = '0' ]] && {
