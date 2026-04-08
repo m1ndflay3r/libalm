@@ -724,9 +724,9 @@ albm() {
   }
   alia "$mask" 1 mask
   [[ ${bm_num::1} = '-' ]] && {
-    until [[ ${bm_num::1} != '-' ]]; do
-      alia "$mask" "$bm_num" bm_num
-    done
+    bm_num=${bm_num:1}
+    almo "$bm_num" "$mask" bm_num
+    [[ "$bm_num" != '0' ]] && alis "$mask" "$bm_num" bm_num
     ((is_neg)) && [[ "$bm_num" != '0' ]] && bm_num="-"$bm_num""
     eval "$outvar=\"\$bm_num\""
     return 0
