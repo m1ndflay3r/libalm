@@ -754,15 +754,72 @@ rrot() {
 
 ## rotate left
 lrot() {
-
+  local lrot_w="$1" rot_c=${2:-1} outvar=${3:-al_return}
+  local -i u
+  [[ -z "$lrot_w" ]] && return 1
+  dat2bin "$lrot_w" lrot_w
+  for ((u=0; u<rot_c; u++)); do
+    lrot_w=""${lrot_w:1}""${lrot_w::1}""
+  done
+  bin2dat "$lrot_w" lrot_w
+  eval "$outvar=\"\$lrot_w\""
 }
 
 ## shift right
 rshft() {
+  local rshft_w="$1" shft_c=${2:-1} outvar=${3:-al_return} shft_ln
+  local -i t
+  [[ -z "$rshft_w" ]] && return 1
+  dat2bin "$rshft_w" rshft_w
+  alis "${#rshft_w}" "1" shft_ln
+  for ((t=0; t<shft_c; t++)); do
+    rshft_w="0"${rshft_w::$shft_ln}""
+  done
+  bin2dat "$rshft_w" rshft_w
+  eval "$outvar=\"\$rshft_w\""
 }
 
 ## shift left
 lshft() {
+  local lshft_w="$1" shft_c=${2:-1} outvar=${3:-al_return}
+  local -i u
+  [[ -z "$lshft_w" ]] && return 1
+  dat2bin "$lshft_w" lshft_w
+  for ((u=0; u<shft_c; u++)); do
+    lshft_w=""${lshft_w:1}"0"
+  done
+  bin2dat "$lshft_w" lshft_w
+  eval "$outvar=\"\$lshft_w\""
+}
+
+## bitwise XOR
+alxor() {
+  local num1="$1" num2="$2" outvar=${3:-al_return} cmp out
+  local -i v pad_ln
+  [[ -z "$num1" || -z "$num2" ]] && return 1
+  # conv to binary
+  dat2bin "$num1" num1
+  dat2bin "$num2" num2
+  # 0-pad to maxln if needed
+  alcm "$num1" "$num2"; cmp=$?
+  [[ "$cmp" = "1" ]] && {
+    pad_ln=${#num1}
+    num2="${(l:pad_ln::0:)num2}"
+  }
+  [[ "$cmp" = "2" ]] && {
+    pad_ln=${#num2}
+    num1="${(l:pad_ln::0:)num1}"
+  }
+  [[ "$cmp" = "3" ]] && pad_ln=${#num1}
+  # loop through bits
+  for ((v=1; v<=pad_ln; v++)); do
+    [[ $num1[$v] != $num2[$v] ]] && {
+      out+='1'
+    } || {
+      out+='0'
+    }
+  done
+  bin2dat "$out" "$outvar"
 }
 
 ## bitwise AND
@@ -771,10 +828,6 @@ aland() {
 
 ## bitwise OR
 alor() {
-}
-
-## bitwise XOR
-alxor() {
 }
 
 ## bitwise NAND
