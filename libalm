@@ -76,8 +76,8 @@ alcm() {
 ## arbitrarily large integer adder
 alia() {
   # take input as strings
-  local num1="$1" num2="$2" outvar=${3:-al_return} working out temp
-  local -i num_ln neg1 neg2 is_sub sign w c b i
+  local num1="$1" num2="$2" outvar=${3:-al_return} out="" temp w1 w2
+  local -i num_ln neg1 neg2 is_sub sign w c b i alia_rem pad_ln
   [[ -z "$num1" || -z "$num2" ]] && return 1
   # treat 0 and -0 the same
   [[ "$num1" = '-0' ]] && num1=0
@@ -91,7 +91,7 @@ alia() {
     eval "$outvar=\"\$num1\""
     return 0
   }
-  # if num is neg, set flag and strip '-'
+  # if number is negative, set neg flag and strip '-'
   [[ ${num1::1} = '-' ]] && {
     ((neg1++))
     num1=${num1:1}
@@ -101,77 +101,76 @@ alia() {
     num2=${num2:1}
   }
   # if one number is negative but the other isnt, treat as subtraction
-  ((neg1!=neg2)) && {
-    ((is_sub++))
-  }
-  # zero-pad shorter num
-  ((${#num1}>=${#num2})) && {
-    num_ln=${#num1}
-    num2="${(l:num_ln::0:)num2}"
-  } || {
-    num_ln=${#num2}
-    num1="${(l:num_ln::0:)num1}"
+  ((neg1!=neg2)) && ((is_sub++))
+  # 0-pad shorter num to length of longest
+  ((${#num1}>${#num2})) && num2="${(l:${#num1}::0:)num2}"
+  ((${#num2}>${#num1})) && num1="${(l:${#num2}::0:)num1}"
+  num_ln=${#num1}
+  # 0-pad both nums to a multiple of 9
+  alia_rem=$((num_ln%9))
+  ((alia_rem)) && {
+    pad_ln=$((num_ln+9 - alia_rem))
+    num1="${(l:pad_ln::0:)num1}"
+    num2="${(l:pad_ln::0:)num2}"
+    num_ln=$pad_ln
   }
   # if is sub, we take sign of larger num
   ((is_sub)) && {
-    [[ "$num1" > "$num2" ]] && {
-      ((neg1)) && ((sign++))
-    }
-    [[ "$num2" > "$num1" ]] && {
+    # since nums are same ln, string comparison = num comparison
+    [[ "$num1" < "$num2" ]] && {
       ((neg2)) && ((sign++))
-      temp="$num1"
-      num1="$num2"
-      num2="$temp"
+      temp="$num1"; num1="$num2"; num2="$temp"
+    } || {
+      ((neg1)) && ((sign++))
     }
   }
   # if both are neg, output is neg
   ((neg1)) && ((neg2)) && ((sign++))
-  # begin iteration over nums
-  for ((i=num_ln; i>0; i--)); do
+  # begin iteration over nums (stride=9)
+  for ((i=num_ln-9; i>=0; i-=9)); do
+    # read 9 char chunks
+    w1=${num1:$i:9}
+    w2=${num2:$i:9}
     ((is_sub)) && {
-      w=$((num1[$i]-num2[$i]))
+      # 10# force base-10 parsing (prevents reading leading zeros as octal)
+      w=$((10#$w1 - 10#$w2))
       ((b)) && {
-        ((w--))
-        ((b--))
+        ((w--)); ((b--))
       }
       ((w<0)) && {
         ((b++))
-        ((w+=10))
-      }
-      true
+        w=$((w+1000000000))
+      }; true
     } || {
-      w=$((num1[$i]+num2[$i]))
+      w=$((10#$w1 + 10#$w2))
       ((c)) && {
-        ((w++))
-        ((c--))
+        ((w++)); ((c--))
       }
-      ((w>=10)) && {
+      ((w>=1000000000)) && {
         ((c++))
-        w=${w:1}
+        w=$((w-1000000000))
       }
     }
+    # 0-pad result back to 9 chars; prepend
+    w="${(l:9::0:)w}"
     out=""$w""$out""
   done
   # add last carry if needed
   ((c)) && [[ -z "$ret_carry" ]] && out="1"$out""
   # strip unneeded zeros
-  [[ ${out::1} = 0 ]] && {
+  [[ ${out::1} = '0' ]] && {
     until [[ ${out::1} != '0' ]]; do
       ((${#out}==1)) && break
       out=${out:1}
     done
   }
-  # add neg sign if needed
-  ((sign)) && out="-"$out""
+  # add neg sign if needed (and avoid -0)
+  ((sign)) && [[ "$out" != '0' ]] && out="-"$out""
   # assign result
   eval "$outvar=\"\$out\""
   # if ret_carry is set, return $c/$b (for alfa); else return 0
   ! [[ -z "$ret_carry" ]] && {
-    ((is_sub)) && {
-      return $((b+2))
-    } || {
-      return $c
-    }
+    ((is_sub)) && return $((b+2)) || return $c
   } || {
     return 0
   }
