@@ -92,14 +92,8 @@ alia() {
     return 0
   }
   # if number is negative, set neg flag and strip '-'
-  [[ ${num1::1} = '-' ]] && {
-    ((neg1++))
-    num1=${num1:1}
-  }
-  [[ ${num2::1} = '-' ]] && {
-    ((neg2++))
-    num2=${num2:1}
-  }
+  [[ ${num1::1} = '-' ]] && { ((neg1++)); num1=${num1:1}; }
+  [[ ${num2::1} = '-' ]] && { ((neg2++)); num2=${num2:1}; }
   # if one number is negative but the other isnt, treat as subtraction
   ((neg1!=neg2)) && ((is_sub++))
   # 0-pad shorter num to length of longest
@@ -110,8 +104,7 @@ alia() {
   alia_rem=$((num_ln%9))
   ((alia_rem)) && {
     pad_ln=$((num_ln+9 - alia_rem))
-    num1="${(l:pad_ln::0:)num1}"
-    num2="${(l:pad_ln::0:)num2}"
+    num1="${(l:pad_ln::0:)num1}"; num2="${(l:pad_ln::0:)num2}"
     num_ln=$pad_ln
   }
   # if is sub, we take sign of larger num
@@ -138,8 +131,7 @@ alia() {
         ((w--)); ((b--))
       }
       ((w<0)) && {
-        ((b++))
-        w=$((w+1000000000))
+        ((b++)); w=$((w+1000000000))
       }; true
     } || {
       w=$((10#$w1 + 10#$w2))
@@ -147,8 +139,7 @@ alia() {
         ((w++)); ((c--))
       }
       ((w>=1000000000)) && {
-        ((c++))
-        w=$((w-1000000000))
+        ((c++)); w=$((w-1000000000))
       }
     }
     # 0-pad result back to 9 chars; prepend
@@ -290,8 +281,8 @@ alfs() {
 
 ## arbitrarily large integer multiplier
 alim() {
-  local num1="$1" num2="$2" alim_out='0' outvar=${3:-al_return} w1 w2 w carry='0' row=''
-  local -i neg1 neg2 is_neg shft carryln row_ln j k
+  local num1="$1" num2="$2" alim_out='0' outvar=${3:-al_return} w1 w2 alim_row=''
+  local -i neg1 neg2 is_neg shft carry row_ln alim_rem1 alim_rem2 pad_ln1 pad_ln2 j k w
   [[ -z "$num1" || -z "$num2" ]] && return 1
   # handle multiply by zero
   [[ "$num1" = "0" || "$num2" = "0" || "$num1" = "-0" || "$num2" = "-0" ]] && {
@@ -299,43 +290,52 @@ alim() {
     return 0
   }
   # trim negs
-  [[ ${num1::1} = '-' ]] && {
-    num1=${num1:1}
-    ((neg1++))
-  }
-  [[ ${num2::1} = '-' ]] && {
-    num2=${num2:1}
-    ((neg2++))
-  }
+  [[ ${num1::1} = '-' ]] && { num1=${num1:1}; ((neg1++)); }
+  [[ ${num2::1} = '-' ]] && { num2=${num2:1}; ((neg2++)); }
   # handle negs
-  ((neg1!=neg2)) && {
-    ((is_neg++))
+  ((neg1!=neg2)) && ((is_neg++))
+  # 0-pad both nums to a multiple of 9
+  alim_rem1=$((${#num1}%9))
+  ((alim_rem1)) && {
+    pad_ln1=$((${#num1}+9 - alim_rem1))
+    num1="${(l:pad_ln1::0:)num1}"
   }
-  # outer loop - read num2 from r to l
-  for ((j=${#num2}; j>0; j--)); do
-    w2=$num2[$j]
-    row=''
-    carry='0'
-    # inner loop - read num1 from r to l
-    for ((k=${#num1}; k>0; k--)); do
-      w1=$num1[$k]
-      w=$(((w1*w2)+carry))
-      ((${#w}==1)) && carry='0'
-      ((${#w}>1)) && {
-        carryln=$((${#w}-1))
-        carry=${w::$carryln}
-        w=${w:$carryln}
-      }
-      row=""$w""$row""
+  alim_rem2=$((${#num2}%9))
+  ((alim_rem2)) && {
+    pad_ln2=$((${#num2}+9 - alim_rem2))
+    num2="${(l:pad_ln2::0:)num2}"
+  }
+  # outer loop - read num2 from r to l (stride=9)
+  for ((j=${#num2}-9; j>=0; j-=9)); do
+    w2=${num2:$j:9}
+    alim_row=''
+    carry=0
+    # inner loop - read num1 from r to l (stride=9)
+    for ((k=${#num1}-9; k>=0; k-=9)); do
+      w1=${num1:$k:9}
+      # multiply chunks; add previous carry (10# prevents parsing as octal)
+      w=$((10#$w1 * 10#$w2 + carry))
+      # extract new carry; chunk w/integer math
+      carry=$((w/1000000000)); w=$((w%1000000000))
+      # 0-pad chunk to 9 chars; prepend to row
+      w="${(l:9::0:)w}"
+      alim_row=""$w""$alim_row""
     done
-    ((carry>0)) && row=""$carry""$row""
-    # zero pad row equal to current shft
-    row_ln=$((${#row}+$shft))
-    row="${(r:row_ln::0:)row}"
+    # prepend carry if needed
+    ((carry>0)) && alim_row=""$carry""$alim_row""
+    # zero pad row equal to current shft (each shift = 9 zeros)
+    ((shft)) && alim_row="${(r:${#alim_row}+$((shft*9))::0:)alim_row}"
     # add to total
-    alia "$alim_out" "$row" alim_out
+    alia "$alim_out" "$alim_row" alim_out
     ((shft++))
   done
+  # strip leading zeros if necessary (it almost always will be, due to 0-pad)
+  [[ ${alim_out::1} = '0' ]] && {
+    until [[ ${alim_out::1} != '0' ]]; do
+      ((${#alim_out}==1)) && break
+      alim_out=${alim_out:1}
+    done
+  }
   # handle neg sign
   ((is_neg)) && alim_out="-"$alim_out""
   eval "$outvar=\"\$alim_out\""
