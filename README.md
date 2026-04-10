@@ -4,7 +4,8 @@
 ----------------------
 
 
-_arithmetic functions:_
+__arithmetic functions:__
+
 
 
     alcm <num1> <num2>
@@ -41,7 +42,7 @@ Float divider. Result is stored under $\<outvar\>.
 ----------------------
 
 
-_conversion functions_
+__conversion functions__
 
 
     dat2bin <data> <outvar>
