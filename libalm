@@ -479,7 +479,7 @@ almo() {
 
 ## arbitrarily large float divider
 alfd() {
-  local num1="$1" num2="$2" outvar=${3:-al_return} n1_micro n2_micro n1_macro n2_macro macro micro al_scale=${al_scale:-20} next_dig out al_rem
+  local num1="$1" num2="$2" outvar=${3:-al_return} n1_micro n2_micro n1_macro n2_macro macro micro al_scale=${al_scale:-20} next_dig out al_rem alfd_rem
   local -i neg1 neg2 is_neg cmp deci_ln n
   [[ -z "$num1" || -z "$num2" ]] && return 1
   # ensure valid float
@@ -525,16 +525,20 @@ alfd() {
   al_rem=${macro#*_}
   macro=${macro%%_*}
   # decimal loop
-  for ((n=0; n<al_scale; n++)); do
+  for ((n=0; n<al_scale; n+=9)); do
     [[ "$al_rem" = '0' ]] && break
-    al_rem=""$al_rem"0"
+    al_rem=""$al_rem"000000000"
     al_delim=1 alid "$al_rem" "$num2" next_dig
     al_rem=${next_dig#*_}
     next_dig=${next_dig%%_*}
+    # 0-pad next_dig to ln of 9
+    next_dig="${(l:9::0:)next_dig}"
     micro+="$next_dig"
   done
-  # reassembly
   [[ -z "$micro" ]] && micro='0'
+  # strip decimals exceeding al_scale
+  micro=${micro::$al_scale}
+  # reassemble
   out=""$macro"."$micro""
   ((is_neg)) && out="-"$out""
   # output result
