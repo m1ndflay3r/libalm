@@ -38,6 +38,9 @@ Integer divider. Result is stored under $\<outvar\>.
 Float divider. Result is stored under $\<outvar\>.
 
 
+----------------------
+
+
 _conversion functions_
 
 
