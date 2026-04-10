@@ -4,7 +4,7 @@
 ----------------------
 
 
-_Usage:_
+_arithmetic functions:_
 
 
     alcm <num1> <num2>
@@ -36,3 +36,31 @@ Integer divider. Result is stored under $\<outvar\>.
 
     alfd <num1> <num2> <outvar>
 Float divider. Result is stored under $\<outvar\>.
+
+
+_conversion functions_
+
+
+    dat2bin <data> <outvar>
+Converts raw binary data to ASCII binary representation. Result is stored under $\<outvar\>.
+
+    bin2dat <binary> <outvar>
+Converts ASCII binary representation to raw binary data. Result is stored under $\<outvar\>.
+
+    bin2hex <binary> <outvar>
+Converts ASCII binary representation to hexadecimal. Result is stored under $\<outvar\>.
+
+    hex2bin <hex> <outvar>
+Converts hexadecimal to ASCII binary representation. Result is stored under $\<outvar\>.
+
+    bin2dec <binary> <outvar>
+Converts ASCII binary representation to decimal value. Result is stored under $\<outvar\>.
+
+    dec2bin <dec> <outvar>
+Converts decimal value to ASCII binary representation. Result is stored under $\<outvar\>.
+
+    hex2dec <hex> <outvar>
+Converts hexadecimal value to decimal value. Result is stored under $\<outvar\>.
+
+    dec2hex <dec> <outvar>
+Converts decimal value to hexadecimal value. Result is stored under $\<outvar\>.
