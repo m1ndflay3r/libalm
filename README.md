@@ -80,7 +80,7 @@ __logic functions__
 Bitmask. Applies \<mask\> to \<num\> and assigns result to \<outvar\>. Set \<hexmask\> to non-empty to treat \<mask\> as a hex value.
 
     lrot <str> <count> <outvar>
-Left rotate. Strips 1 bit from left side of \<str\> and appends it. Repeats this behavior \<count\> times. Stores result under \<outvar\>.
+Left rotate. Strips 1 bit from left side of \<str\> and appends it. Repeats this behavior \<count\> times. Result is stored under \<outvar\>.
 
     rrot <str> <count> <outvar>
 Right rotate. Strips 1 bit from right side of \<str\> and prepends it. Repeats this behavior \<count\> times. Result is stored under \<outvar\>.
@@ -90,3 +90,6 @@ Left shift. Strips 1 bit from left side of \<str\> and appends a 0. Repeats this
 
     rshft <str> <count> <outvar>
 Right shift. Strips 1 bit from right side of \<str\> and prepends a 0. Repeats this behavior \<count\> times. Result is stored under \<outvar\>.
+
+    alxor <str1> <str2> <outvar>
+Bitwise XOR. Takes two strings of any size (shortest is left padded with 0s), and performs bit for bit comparison, writing a 0 for every like bit pair and a 1 for every unlike bit pair. Stores result under \<outvar\>.
