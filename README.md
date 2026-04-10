@@ -33,10 +33,10 @@ Modulo. Runs alim, and stores remainder under $\<outvar\>.
 Float multiplier. Result is stored under $\<outvar\>.
 
     alid <num1> <num2> <outvar>
-Integer divider. Result is stored under $\<outvar\>.
+Integer divider. Result is stored under $\<outvar\>. Remainder is stored under "$al_rem".
 
     alfd <num1> <num2> <outvar>
-Float divider. Result is stored under $\<outvar\>.
+Float divider. Set variable "al_scale" to change precision (default 20 decimal places). Result is stored under $\<outvar\>.
 
 
 ----------------------
