@@ -356,17 +356,13 @@ alfm() {
   }
   # handle negs
   [[ ${num1::1} = '-' ]] && {
-    num1=${num1:1}
-    ((neg1++))
+    num1=${num1:1}; ((neg1++))
   }
   [[ ${num2::1} = '-' ]] && {
-    num2=${num2:1}
-    ((neg2++))
+    num2=${num2:1}; ((neg2++))
   }
   # if one num neg but other not, result is neg
-  ((neg1!=neg2)) && {
-    ((is_neg++))
-  }
+  ((neg1!=neg2)) && ((is_neg++))
   # separate decimals from integers
   n1_micro=${num1#*.}
   n2_micro=${num2#*.}
