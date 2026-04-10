@@ -68,3 +68,25 @@ Converts hexadecimal value to decimal value. Result is stored under $\<outvar\>.
 
     dec2hex <dec> <outvar>
 Converts decimal value to hexadecimal value. Result is stored under $\<outvar\>.
+
+
+----------------------
+
+
+__logic functions__
+
+
+    albm <num> <mask> <outvar>
+Bitmask. Applies <mask> to <num> and assigns result to <outvar>. Set <hexmask> to non-empty to treat <mask> as a hex value.
+
+    lrot <str> <count> <outvar>
+Left rotate. Strips 1 bit from left side of <str> and appends it. Repeats this behavior <count> times. Stores result under <outvar>.
+
+    rrot <str> <count> <outvar>
+Right rotate. Strips 1 bit from right side of <str> and prepends it. Repeats this behavior <count> times. Result is stored under <outvar>.
+
+    lshft <str> <count> <outvar>
+Left shift. Strips 1 bit from left side of <str> and appends a 0. Repeats this behavior <count> times. Result is stored under <outvar>.
+
+    rshft <str> <count> <outvar>
+Right shift. Strips 1 bit from right side of <str> and prepends a 0. Repeats this behavior <count> times. Result is stored under <outvar>.
