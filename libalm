@@ -76,8 +76,8 @@ alcm() {
 ## arbitrarily large integer adder
 alia() {
   # take input as strings
-  local num1="$1" num2="$2" outvar=${3:-al_return} out="" temp w1 w2
-  local -i num_ln neg1 neg2 is_sub sign w c b i alia_rem pad_ln
+  local num1="$1" num2="$2" outvar=${3:-al_return} out="" temp w1 w2 w
+  local -i num_ln neg1 neg2 is_sub sign c b i alia_rem pad_ln
   [[ -z "$num1" || -z "$num2" ]] && return 1
   # treat 0 and -0 the same
   [[ "$num1" = '-0' ]] && num1=0
@@ -281,8 +281,8 @@ alfs() {
 
 ## arbitrarily large integer multiplier
 alim() {
-  local num1="$1" num2="$2" alim_out='0' outvar=${3:-al_return} w1 w2 alim_row=''
-  local -i neg1 neg2 is_neg shft carry row_ln alim_rem1 alim_rem2 pad_ln1 pad_ln2 j k w
+  local num1="$1" num2="$2" alim_out='0' outvar=${3:-al_return} w1 w2 alim_row='' w
+  local -i neg1 neg2 is_neg shft carry row_ln alim_rem1 alim_rem2 pad_ln1 pad_ln2 j k
   [[ -z "$num1" || -z "$num2" ]] && return 1
   # handle multiply by zero
   [[ "$num1" = "0" || "$num2" = "0" || "$num1" = "-0" || "$num2" = "-0" ]] && {
@@ -388,9 +388,10 @@ alfm() {
 
 ## arbitrarily large integer divider
 alid() {
-  local num1="$1" num2="$2" outvar=${3:-al_return} alid_w out tmp prev_tmp
-  local -i neg1 neg2 is_neg cmp l m
+  local num1="$1" num2="$2" outvar=${3:-al_return} alid_w="" out="" next_chunk test_val sub_val m_padded m
+  local -i neg1 neg2 is_neg cmp alid_rem pad_ln l low high mid cmp_test
   [[ -z "$num1" || -z "$num2" ]] && return 1
+  # treat -0 and 0 the same
   [[ "$num1" = '-0' ]] && num1=0
   [[ "$num2" = '-0' ]] && num2=0
   # err if divide by zero
@@ -398,81 +399,75 @@ alid() {
   # if num1 is 0, result and remainder will always be 0
   [[ "$num1" = '0' ]] && {
     al_rem=0
-    [[ -z "$al_delim" ]] && {
-      eval "$outvar=\"0\""
-    } || {
-      eval "$outvar=\"0_\${al_rem}\""
-    }
+    [[ -z "$al_delim" ]] && eval "$outvar=\"0\"" || eval "$outvar=\"0_\${al_rem}\""
     return 0
   }
   # handle negs
-  [[ ${num1::1} = '-' ]] && {
-    num1=${num1:1}
-    ((neg1++))
-  }
-  [[ ${num2::1} = '-' ]] && {
-    num2=${num2:1}
-    ((neg2++))
-  }
+  [[ ${num1::1} = '-' ]] && { num1=${num1:1}; ((neg1++)); }
+  [[ ${num2::1} = '-' ]] && { num2=${num2:1}; ((neg2++)); }
   ((neg1!=neg2)) && ((is_neg++))
   # if num1 is less than num2, exit with remainder
   alcm "$num1" "$num2"; cmp=$?
   ((cmp==2)) && {
     al_rem="$num1"
-    [[ -z "$al_delim" ]] && {
-      eval "$outvar=\"0\""
-    } || {
-      eval "$outvar=\"0_\${al_rem}\""
-    }
+    [[ -z "$al_delim" ]] && eval "$outvar=\"0\"" || eval "$outvar=\"0_\${al_rem}\""
     return 0
   }
-  cmp=0
-  # iterate num1 from l->r
-  for ((l=1; l<=${#num1}; l++)); do
-    alid_w=""$alid_w""$num1[$l]""
+  # 0-pad num1 to a multiple of 9
+  alid_rem=$((${#num1}%9))
+  ((alid_rem)) && {
+    pad_ln=$((${#num1}+9 - alid_rem))
+    num1="${(l:pad_ln::0:)num1}"
+  }
+  # iterate num1 from l->r in chunks of 9
+  for ((l=0; l<${#num1}; l+=9)); do
+    next_chunk=${num1:$l:9}
+    alid_w=""$alid_w""$next_chunk""
     # strip 0s
-    ((${#alid_w}!=1)) && {
+    [[ ${alid_w::1} = '0' ]] && {
       until [[ ${alid_w::1} != '0' ]]; do
         ((${#alid_w}==1)) && break
         alid_w=${alid_w:1}
       done
     }
-    # if num2 > w, write 0
     alcm "$alid_w" "$num2"; cmp=$?
     ((cmp==2)) && {
-      out+="0"
+      out+="000000000"
       continue
-    # else do long divide (guessing loop)
+    # else do binary search division
     } || {
-      tmp="0"
-      for ((m=1; m>0; m++)); do
-        prev_tmp="$tmp"
-        alia "$tmp" "$num2" tmp
-        alcm "$tmp" "$alid_w"; cmp=$?
-        ((cmp==1)) && {
-          ((m--))
-          out+="$m"
-          break
-        }
+      low=0; high=999999999; m=0
+      while ((low<=high)); do
+        mid=$((low+(high-low)/2))
+        # multiply divisor by chunk guess
+        alim "$num2" "$mid" test_val
+        # comparator determines move
+        alcm "$test_val" "$alid_w"; cmp_test=$?
+        ((cmp_test==3)) && { m=$mid; break; }        # exact match
+        ((cmp_test==2)) && { m=$mid; low=$((mid+1)); }  # too low, but safe - move floor up
+        ((cmp_test==1)) && { high=$((mid-1)); }    # too high - move ceiling down
       done
-      alis "$alid_w" "$prev_tmp" alid_w
+      # subtract successful multiple
+      alim "$num2" "$m" sub_val
+      alis "$alid_w" "$sub_val" alid_w
+      # 0-pad quotient chunk to ln of 9 before writing
+      m_padded="${(l:9::0:)m}"
+      out+="$m_padded"
     }
   done
   # strip 0s from out
-  until [[ ${out::1} != '0' ]]; do
-    ((${#out}==1)) && break
-    out=${out:1}
-  done
+  [[ ${out::1} = '0' ]] && {
+    until [[ ${out::1} != '0' ]]; do
+      ((${#out}==1)) && break
+      out=${out:1}
+    done
+  }
   # set neg if needed
   ((is_neg)) && out="-"$out""
   # set remainder to al_rem
   al_rem="$alid_w"
   # output result
-  [[ -z "$al_delim" ]] && {
-    eval "$outvar=\"\$out\""
-  } || {
-    eval "$outvar=\"\${out}_\${al_rem}\""
-  }
+  [[ -z "$al_delim" ]] && eval "$outvar=\"\$out\"" || eval "$outvar=\"\${out}_\${al_rem}\""
 }
 
 ## arbitrarily large modulo
