@@ -93,3 +93,21 @@ Right shift. Strips 1 bit from right side of \<str\> and prepends a 0. Repeats t
 
     alxor <str1> <str2> <outvar>
 Bitwise XOR. Takes two strings of any size (shortest is left padded with 0s), and performs bit for bit comparison, writing a 0 for every like bit pair and a 1 for every unlike bit pair. Stores result under \<outvar\>.
+
+    alxnor <str1> <str2> <outvar>
+Bitwise XNOR. Takes two strings of any size (shortest is left padded with 0s), and performs bit for bit comparison, writing a 1 for every like bit pair and a 0 for every unlike bit pair. Stores result under \<outvar\>.
+
+    aland <str1> <str2> <outvar>
+Bitwise AND. Takes two strings of any size (shortest is left padded with 0s), and performs bit for bit comparison, writing a 1 if both bits are 1 and a 0 otherwise. Stores result under \<outvar\>.
+
+    alor <str1> <str2> <outvar>
+Bitwise OR. Takes two strings of any size (shortest is left padded with 0s), and performs bit for bit comparison, writing a 1 if either bit is 1 and a 0 otherwise. Stores result under \<outvar\>.
+
+    alnor <str1> <str2> <outvar>
+Bitwise NOR. Takes two strings of any size (shortest is left padded with 0s), and performs bit for bit comparison, writing a 1 if both bits are 0 and a 0 otherwise. Stores result under \<outvar\>.
+
+    alnand <str1> <str2> <outvar>
+Bitwise NAND. Takes two strings of any size (shortest is left padded with 0s), and performs bit for bit comparison, writing a 1 if either bit is 0 and a 0 otherwise. Stores result under \<outvar\>.
+
+    alnot <str> <outvar>
+Bitwise NOT. Takes a string and writes its inverse (every 1 becomes a 0, every 0 a 1). Result is stored under <outvar>.
