@@ -633,32 +633,51 @@ bin2hex() {
   eval "$outvar=\"\$out\""
 }
 
+## binary to decimal
 bin2dec() {
-  local bin="$1" outvar=${2:-al_return} char b2d_out=0
-  local -i s
+  local bin="$1" outvar=${2:-al_return} total="0" power="1" chunk val chunk_dec
+  local -i q b2d_rem pad_ln orig_ln
   [[ -z "$bin" ]] && return 1
-  for ((s=1; s<=${#bin}; s++)); do
-    char=$bin[$s]
-    alia "$b2d_out" "$b2d_out" b2d_out
-    [[ "$char" = 1 ]] && alia "$b2d_out" "1" b2d_out
+  orig_ln=${#bin}
+  # 0-pad binary string to a multiple of 29 bits
+  b2d_rem=$((orig_ln%29))
+  ((b2d_rem)) && {
+    pad_ln=$((orig_ln+29 - b2d_rem))
+    bin="${(l:pad_ln::0:)bin}"
+  } || pad_ln=$orig_ln
+  # read from r->l in 29-bit chunks
+  for ((q=pad_ln-29; q>=0; q-=29)); do
+    chunk=${bin:$q:29}
+    # convert natively
+    val=$((2#$chunk))
+    # if chunk has positive non-zero value, multiply by current power and add to total
+    ((val>0)) && {
+      alim "$val" "$power" chunk_dec
+      alia "$total" "$chunk_dec" total
+    }
+    # if not last chunk; multiply power by 2^29 for next chunk
+    ((q>0)) && alim "$power" "536870912" power
   done
-  eval "$outvar=\"\$b2d_out\""
+  eval "$outvar=\"\$total\""
 }
 
+## decimal to binary
 dec2bin() {
-  local dec="$1" tmp_dec="$1" outvar=${2:-al_return} d2b_out d2b_rem
+  local dec="$1" tmp_dec="$1" outvar=${2:-al_return} out="" d2b_rem bin_chunk
   [[ -z "$dec" ]] && return 1
-  [[ "$dec" = '0' ]] && {
-    eval "$outvar=\"0\""
-    return 0
-  }
+  [[ "$dec" = '0' ]] && { eval "$outvar=\"0\""; return 0; }
   while [[ "$tmp_dec" != '0' ]]; do
-    al_delim=1 alid "$tmp_dec" "2" tmp_dec
+    # divide by 2^29 (536,870,912)
+    al_delim=1 alid "$tmp_dec" "536870912" tmp_dec
     d2b_rem=${tmp_dec#*_}
     tmp_dec=${tmp_dec%%_*}
-    d2b_out=""$d2b_rem""$d2b_out""
+    # natively convert decimal remainder to binary
+    bin_chunk=$(([##2]10#$d2b_rem))
+    # if current chunk is not the final (left-most); 0-pad to 29 bits
+    [[ "$tmp_dec" != '0' ]] && bin_chunk="${(l:29::0:)bin_chunk}"
+    out="${bin_chunk}${out}"
   done
-  eval "$outvar=\"\$d2b_out\""
+  eval "$outvar=\"\$out\""
 }
 
 hex2dec() {
