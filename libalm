@@ -849,8 +849,8 @@ alxnor() {
   for ((y=0; y<pad_ln; y+=60)); do
     c1=${num1:$y:60}
     c2=${num2:$y:60}
-    # do native 60-bit XNOR; conv back to bin
-    w=$(([##2](2#$c1^2#$c2)^2#111111111111111111111111111111111111111111111111111111111111))
+    # do native 60-bit XOR; XOR against 1s to invert; conv back to bin
+    w=$(([##2](2#$c1 ^ 2#$c2) ^ 2#111111111111111111111111111111111111111111111111111111111111))
     # 0-pad to 60 chars; append
     w="${(l:60::0:)w}"
     out+="$w"
