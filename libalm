@@ -622,7 +622,7 @@ bin2hex() {
     out+="$w"
   done
   # remove padding mathematically
-  ((rem)) && out=${out:$((60-rem))}
+  ((rem)) && out=${out:$(((60-rem)/4))}
   # strip leading zeros
   [[ ${out::1} = '0' ]] && {
     until [[ ${out::1} != '0' ]]; do
