@@ -957,6 +957,9 @@ alnor() {
     w="${(l:60::0:)w}"
     out+="$w"
   done
+  # remove 0-pad to restore original data ln
+  ((rem)) && out=${out:$((60-rem))}
+  bin2dat "$out" "$outvar"
 }
 
 ## bitwise NAND
@@ -988,11 +991,14 @@ alnand() {
     w="${(l:60::0:)w}"
     out+="$w"
   done
+  # remove 0-pad to restore original data ln
+  ((rem)) && out=${out:$((60-rem))}
+  bin2dat "$out" "$outvar"
 }
 
 ## bitwise NOT
 alnot() {
-  local num1="$1" outvar=${3:-al_return} out="" c1 w
+  local num1="$1" outvar=${2:-al_return} out="" c1 w
   local -i y pad_ln rem orig_ln
   [[ -z "$num1" ]] && return 1
   # conv to binary
@@ -1013,4 +1019,7 @@ alnot() {
     w="${(l:60::0:)w}"
     out+="$w"
   done
+  # remove 0-pad to restore original data ln
+  ((rem)) && out=${out:$((60-rem))}
+  bin2dat "$out" "$outvar"
 }
