@@ -569,40 +569,28 @@ bin2dat() {
   eval "$outvar=\"\$out\""
 }
 
-bin2hex() {
-  local bin="$1" outvar=${2:-al_return} out="" w hex
-  local -i q b2h_rem pad_ln
-  [[ -z "$bin" ]] && return 1
-  # determine if padding is needed to make length a multiple of 4
-  b2h_rem=$((${#bin}%4))
-  ((b2h_rem)) && {
-    pad_ln=$((${#bin}+4 - b2h_rem))
-    bin="${(l:pad_ln::0:)bin}"
-  }
-  # read in 4-byte chunks
-  for ((q=0; q<${#bin}; q+=4)); do
-    w=${bin:$q:4}
-    case "$w" in
-      (0000) hex="0" ;;
-      (0001) hex="1" ;;
-      (0010) hex="2" ;;
-      (0011) hex="3" ;;
-      (0100) hex="4" ;;
-      (0101) hex="5" ;;
-      (0110) hex="6" ;;
-      (0111) hex="7" ;;
-      (1000) hex="8" ;;
-      (1001) hex="9" ;;
-      (1010) hex="a" ;;
-      (1011) hex="b" ;;
-      (1100) hex="c" ;;
-      (1101) hex="d" ;;
-      (1110) hex="e" ;;
-      (1111) hex="f" ;;
-      (*) return 1 ;;
-    esac
-    out+="$hex"
+hex2bin() {
+  local hex="$1" outvar=${2:-al_return} out="" chunk w
+  local -i q rem pad_ln orig_ln
+  [[ -z "$hex" ]] && return 1
+  orig_ln=${#hex}
+  # 0-pad hex to a multiple of 15 (60 bits)
+  rem=$((orig_ln%15))
+  ((rem)) && {
+    pad_ln=$((orig_ln+15 - rem))
+    hex="${(l:pad_ln::0:)hex}"
+  } || pad_ln=$orig_ln
+  # read 15 hex chars at a time
+  for ((q=0; q<pad_ln; q+=15)); do
+    chunk=${hex:$q:15}
+    # native conversion from base-16 to base-2
+    w=$(([##2]16#$chunk))
+    # 0-pad to exactly 60 binary bits
+    w="${(l:60::0:)w}"
+    out+="$w"
   done
+  # remove padding mathematically (1 hex pad = 4 bits)
+  ((rem)) && out=${out:$(((15-rem)*4))}
   # strip leading zeros
   [[ ${out::1} = '0' ]] && {
     until [[ ${out::1} != '0' ]]; do
@@ -613,34 +601,28 @@ bin2hex() {
   eval "$outvar=\"\$out\""
 }
 
-hex2bin() {
-  local hex="$1" outvar=${2:-al_return} w bin out
-  local -i r
-  [[ -z "$hex" ]] && return 1
-  # loop over hex, conv to bin
-  for ((r=0; r<${#hex}; r++)); do
-    w=${hex:$r:1}
-    case "$w" in
-      (0) bin="0000" ;;
-      (1) bin="0001" ;;
-      (2) bin="0010" ;;
-      (3) bin="0011" ;;
-      (4) bin="0100" ;;
-      (5) bin="0101" ;;
-      (6) bin="0110" ;;
-      (7) bin="0111" ;;
-      (8) bin="1000" ;;
-      (9) bin="1001" ;;
-      (a|A) bin="1010" ;;
-      (b|B) bin="1011" ;;
-      (c|C) bin="1100" ;;
-      (d|D) bin="1101" ;;
-      (e|E) bin="1110" ;;
-      (f|F) bin="1111" ;;
-      (*) return 1 ;;
-    esac
-    out+="$bin"
+bin2hex() {
+  local bin="$1" outvar=${2:-al_return} out="" chunk w
+  local -i q rem pad_ln orig_ln
+  [[ -z "$bin" ]] && return 1
+  orig_ln=${#bin}
+  # 0-pad hex to a multiple of 60 bits
+  rem=$((orig_ln%60))
+  ((rem)) && {
+    pad_ln=$((orig_ln+60 - rem))
+    bin="${(l:pad_ln::0:)bin}"
+  } || pad_ln=$orig_ln
+  # read 60 bin chars at a time
+  for ((q=0; q<pad_ln; q+=60)); do
+    chunk=${bin:$q:60}
+    # native conversion from base-2 to base-16
+    w=$(([##16]2#$chunk))
+    # 0-pad to exactly 15 hex chars
+    w="${(l:15::0:)w}"
+    out+="$w"
   done
+  # remove padding mathematically
+  ((rem)) && out=${out:$((60-rem))}
   # strip leading zeros
   [[ ${out::1} = '0' ]] && {
     until [[ ${out::1} != '0' ]]; do
