@@ -828,30 +828,35 @@ alxor() {
 
 ## bitwise XNOR
 alxnor() {
-  local num1="$1" num2="$2" outvar=${3:-al_return} cmp out
-  local -i v pad_ln
+  local num1="$1" num2="$2" outvar=${3:-al_return} out="" c1 c2 w
+  local -i y pad_ln rem orig_ln
   [[ -z "$num1" || -z "$num2" ]] && return 1
   # conv to binary
   dat2bin "$num1" num1
   dat2bin "$num2" num2
   # 0-pad to maxln if needed
-  ((${#num1}>${#num2})) && {
-    pad_ln=${#num1}
-    num2="${(l:pad_ln::0:)num2}"
-  }
-  ((${#num1}<${#num2})) && {
-    pad_ln=${#num2}
+  ((${#num1}>${#num2})) && num2="${(l:${#num1}::0:)num2}"
+  ((${#num2}>${#num1})) && num1="${(l:${#num2}::0:)num1}"
+  orig_ln=${#num1}
+  # 0-pad both nums to a multiple of 60
+  rem=$((orig_ln%60))
+  ((rem)) && {
+    pad_ln=$((orig_ln+60 - rem))
     num1="${(l:pad_ln::0:)num1}"
-  }
-  ((${#num1}==${#num2})) && pad_ln=${#num1}
-  # loop through bits
-  for ((v=1; v<=pad_ln; v++)); do
-    [[ $num1[$v] = $num2[$v] ]] && {
-      out+='1'
-    } || {
-      out+='0'
-    }
+    num2="${(l:pad_ln::0:)num2}"
+  } || pad_ln=$orig_ln
+  # loop through bits in 60-bit chunks
+  for ((y=0; y<pad_ln; y+=60)); do
+    c1=${num1:$y:60}
+    c2=${num2:$y:60}
+    # do native 60-bit XNOR; conv back to bin
+    w=$(([##2](2#$c1^2#$c2)^2#111111111111111111111111111111111111111111111111111111111111))
+    # 0-pad to 60 chars; append
+    w="${(l:60::0:)w}"
+    out+="$w"
   done
+  # remove 0-pad to restore original data ln
+  ((rem)) && out=${out:$((60-rem))}
   bin2dat "$out" "$outvar"
 }
 
