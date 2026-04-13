@@ -30,7 +30,9 @@
 | **dec2bin** | \<dec\> \<outvar\> | Converts a decimal value to ASCII binary representation. |
 | **hex2dec** | \<hex\> \<outvar\> | Converts a hexadecimal value to a decimal value. |
 | **dec2hex** | \<dec\> \<outvar\> | Converts a decimal value to a hexadecimal value. |
+
 *(All conversion results are stored under $\<outvar\>)*
+
 <a id="logic"></a>
 ## Logic Functions
 > **💡 Note on strmod:** With the exception of albm, all logic functions below support the strmod flag. When set to a non-empty value, the function expects raw data input instead of numeric input (allowing you to, for instance, XOR the strings "cat" and "dog").
