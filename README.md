@@ -51,4 +51,5 @@
 | **alnor** | \<str1\> \<str2\> \<outvar\> | **Bitwise NOR.** Bit-for-bit comparison. Writes 1 if both bits are 0, and 0 otherwise. |
 | **alnand** | \<str1\> \<str2\> \<outvar\> | **Bitwise NAND.** Bit-for-bit comparison. Writes 1 if either bit is 0, and 0 otherwise. |
 | **alnot** | \<str\> \<outvar\> | **Bitwise NOT.** Inverses the string (every 1 becomes a 0, every 0 becomes a 1). |
+
 *(All logic results are stored under $\<outvar\>)*
