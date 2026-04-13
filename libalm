@@ -774,31 +774,40 @@ lrot() {
   eval "$outvar=\"\$lrot_w\""
 }
 
-## shift right
-rshft() {
-  local rshft_w="$1" shft_c=${2:-1} outvar=${3:-al_return}
-  local -i v shft_ln
-  [[ -z "$rshft_w" ]] && return 1
-  dat2bin "$rshft_w" rshft_w
-  shft_ln=$((${#rshft_w}-1))
-  for ((v=0; v<shft_c; v++)); do
-    rshft_w="0"${rshft_w::$shft_ln}""
-  done
-  bin2dat "$rshft_w" rshft_w
-  eval "$outvar=\"\$rshft_w\""
-}
-
 ## shift left
 lshft() {
   local lshft_w="$1" shft_c=${2:-1} outvar=${3:-al_return}
-  local -i x
+  local -i str_ln
   [[ -z "$lshft_w" ]] && return 1
   dat2bin "$lshft_w" lshft_w
-  for ((x=0; x<shft_c; x++)); do
-    lshft_w=""${lshft_w:1}"0"
-  done
+  str_ln=${#lshft_w}
+  # if shift is larger than string, it becomes entirely zeros
+  ((shft_c>=str_ln)) && {
+    lshft_w="${(l:str_ln::0:)}"
+  } || {
+    # trim 'shft_c' num of chars; append 'shft_c' num of zeros
+    lshft_w="${lshft_w:$shft_c}${(l:shft_c::0:)}"
+  }
   bin2dat "$lshft_w" lshft_w
   eval "$outvar=\"\$lshft_w\""
+}
+
+## shift right
+rshft() {
+  local rshft_w="$1" shft_c=${2:-1} outvar=${3:-al_return}
+  local -i str_ln rem_ln
+  [[ -z "$rshft_w" ]] && return 1
+  dat2bin "$rshft_w" rshft_w
+  str_ln=${#rshft_w}
+  ((shft_c>=str_ln)) && {
+    rshft_w="${(l:str_ln::0:)}"
+  } || {
+    # prepend 'shft_c' number of zeros, trim trailing chars
+    rem_ln=$((str_ln-shft_c))
+    rshft_w="${(l:shft_c::0:)}${rshft_w::$rem_ln}"
+  }
+  bin2dat "$rshft_w" rshft_w
+  eval "$outvar=\"\$rshft_w\""
 }
 
 ## bitwise XOR
