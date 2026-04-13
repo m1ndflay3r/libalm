@@ -987,7 +987,7 @@ alnor() {
   ! [[ -z "$strmod" ]] && {
     dat2bin "$num1" num1; dat2bin "$num2" num2
   } || {
-    dec2bin "$num1" num1; dec2bin "$num2" num2"
+    dec2bin "$num1" num1; dec2bin "$num2" num2
   }
   # 0-pad to maxln if needed
   ((${#num1}>${#num2})) && num2="${(l:${#num1}::0:)num2}"
