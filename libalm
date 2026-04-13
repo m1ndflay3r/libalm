@@ -547,6 +547,7 @@ alfd() {
 
 #### conversion functions ####
 
+## raw data to binary
 dat2bin() {
   local working="$1" outvar=${2:-al_return} out char
   local -i o
@@ -558,6 +559,7 @@ dat2bin() {
   eval "$outvar=\"\$out\""
 }
 
+## binary to raw data
 bin2dat() {
   local working="$1" char out outvar=${2:-al_return}
   local -i p
@@ -569,6 +571,7 @@ bin2dat() {
   eval "$outvar=\"\$out\""
 }
 
+## hexadecimal to binary
 hex2bin() {
   local hex="$1" outvar=${2:-al_return} out="" chunk w
   local -i q rem pad_ln orig_ln
@@ -601,6 +604,7 @@ hex2bin() {
   eval "$outvar=\"\$out\""
 }
 
+## binary to hexadecimal
 bin2hex() {
   local bin="$1" outvar=${2:-al_return} out="" chunk w
   local -i q rem pad_ln orig_ln
@@ -680,6 +684,7 @@ dec2bin() {
   eval "$outvar=\"\$out\""
 }
 
+## hexadecimal to decimal
 hex2dec() {
   local hex="$1" outvar=${2:-al_return} h2d_tmp
   [[ -z "$hex" ]] && return 1
@@ -687,6 +692,7 @@ hex2dec() {
   bin2dec "$h2d_tmp" "$outvar"
 }
 
+## decimal to hexadecimal
 dec2hex() {
   local dec="$1" outvar=${2:-al_return} d2h_tmp
   [[ -z "$dec" ]] && return 1
