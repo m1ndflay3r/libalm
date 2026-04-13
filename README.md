@@ -1,9 +1,10 @@
 # libalm
 **libalm** is a fast arbitrary-precision / bignum mathematics library written in pure Zsh. It is designed for use anywhere a signed 64-bit integer just isn't big enough.
 ## Table of Contents
- * Arithmetic Functions
- * Conversion Functions
- * Logic Functions
+- [Arithmetic Functions](#arithmetic)
+- [Conversion Functions](#conversion)
+- [Logic Functions](#logic)
+<a id="arithmetic"></a>
 ## Arithmetic Functions
 | Command | Arguments | Description |
 |---|---|---|
@@ -17,6 +18,7 @@
 | **alfm** | <num1> <num2> <outvar> | **Float Multiplier.** Result is stored under $<outvar>. |
 | **alid** | <num1> <num2> <outvar> | **Integer Divider.** Result is stored under $<outvar>. Remainder is stored under $al_rem. |
 | **alfd** | <num1> <num2> <outvar> | **Float Divider.** Result is stored under $<outvar>. *Note: Set the variable $al_scale to change precision (defaults to 20 decimal places).* |
+<a id="conversion"></a>
 ## Conversion Functions
 | Command | Arguments | Description |
 |---|---|---|
@@ -29,6 +31,7 @@
 | **hex2dec** | <hex> <outvar> | Converts a hexadecimal value to a decimal value. |
 | **dec2hex** | <dec> <outvar> | Converts a decimal value to a hexadecimal value. |
 *(All conversion results are stored under $<outvar>)*
+<a id="logic"></a>
 ## Logic Functions
 > **💡 Note on strmod:** With the exception of albm, all logic functions below support the strmod flag. When set to a non-empty value, the function expects raw data input instead of numeric input (allowing you to, for instance, XOR the strings "cat" and "dog").
 > 
