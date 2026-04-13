@@ -744,7 +744,9 @@ rrot() {
   local rrot_w="$1" rot_c=${2:-1} outvar=${3:-al_return}
   local -i str_ln rot_idx
   [[ -z "$rrot_w" ]] && return 1
-  dat2bin "$rrot_w" rrot_w
+  ! [[ -z "$strmod" ]] && {
+    dat2bin "$rrot_w" rrot_w
+  } || dec2bin "$rrot_w" rrot_w
   str_ln=${#rrot_w}
   # modulo rotation count to skip full 360s
   rot_c=$((rot_c%str_ln))
@@ -753,8 +755,9 @@ rrot() {
     rot_idx=$((str_ln-rot_c))
     rrot_w="${rrot_w:$rot_idx}${rrot_w::$rot_idx}"
   }
-  bin2dat "$rrot_w" rrot_w
-  eval "$outvar=\"\$rrot_w\""
+  ! [[ -z "$strmod" ]] && {
+    bin2dat "$rrot_w" "$outvar"
+  } || bin2dec "$rrot_w" "$outvar"
 }
 
 ## rotate left
@@ -762,7 +765,9 @@ lrot() {
   local lrot_w="$1" rot_c=${2:-1} outvar=${3:-al_return}
   local -i str_ln
   [[ -z "$lrot_w" ]] && return 1
-  dat2bin "$lrot_w" lrot_w
+  ! [[ -z "$strmod" ]] && {
+    dat2bin "$lrot_w" lrot_w
+  } || dec2bin "$lrot_w" lrot_w
   str_ln=${#lrot_w}
   # modulo rotation count to skip full 360s
   rot_c=$((rot_c%str_ln))
@@ -770,8 +775,9 @@ lrot() {
   ((rot_c>0)) && {
     lrot_w="${lrot_w:$rot_c}${lrot_w::$rot_c}"
   }
-  bin2dat "$lrot_w" lrot_w
-  eval "$outvar=\"\$lrot_w\""
+  ! [[ -z "$strmod" ]] && {
+    bin2dat "$lrot_w" "$outvar"
+  } || bin2dec "$lrot_w" "$outvar"
 }
 
 ## shift left
@@ -779,7 +785,9 @@ lshft() {
   local lshft_w="$1" shft_c=${2:-1} outvar=${3:-al_return}
   local -i str_ln
   [[ -z "$lshft_w" ]] && return 1
-  dat2bin "$lshft_w" lshft_w
+  ! [[ -z "$strmod" ]] && {
+    dat2bin "$lshft_w" lshft_w
+  } || dec2bin "$lshft_w" lshft_w
   str_ln=${#lshft_w}
   # if shift is larger than string, it becomes entirely zeros
   ((shft_c>=str_ln)) && {
@@ -788,8 +796,9 @@ lshft() {
     # trim 'shft_c' num of chars; append 'shft_c' num of zeros
     lshft_w="${lshft_w:$shft_c}${(l:shft_c::0:)}"
   }
-  bin2dat "$lshft_w" lshft_w
-  eval "$outvar=\"\$lshft_w\""
+  ! [[ -z "$strmod" ]] && {
+    bin2dat "$lshft_w" "$outvar"
+  } || bin2dec "$lshft_w" "$outvar"
 }
 
 ## shift right
@@ -797,7 +806,9 @@ rshft() {
   local rshft_w="$1" shft_c=${2:-1} outvar=${3:-al_return}
   local -i str_ln rem_ln
   [[ -z "$rshft_w" ]] && return 1
-  dat2bin "$rshft_w" rshft_w
+  ! [[ -z "$strmod" ]] && {
+    dat2bin "$rshft_w" rshft_w
+  } || dec2bin "$rshft_w" rshft_w
   str_ln=${#rshft_w}
   ((shft_c>=str_ln)) && {
     rshft_w="${(l:str_ln::0:)}"
@@ -806,8 +817,9 @@ rshft() {
     rem_ln=$((str_ln-shft_c))
     rshft_w="${(l:shft_c::0:)}${rshft_w::$rem_ln}"
   }
-  bin2dat "$rshft_w" rshft_w
-  eval "$outvar=\"\$rshft_w\""
+  ! [[ -z "$strmod" ]] && {
+    bin2dat "$rshft_w" "$outvar"
+  } || bin2dec "$rshft_w" "$outvar"
 }
 
 ## bitwise XOR
@@ -816,8 +828,11 @@ alxor() {
   local -i y pad_ln rem orig_ln
   [[ -z "$num1" || -z "$num2" ]] && return 1
   # conv to binary
-  dat2bin "$num1" num1
-  dat2bin "$num2" num2
+  ! [[ -z "$strmod" ]] && {
+    dat2bin "$num1" num1; dat2bin "$num2" num2
+  } || {
+    dec2bin "$num1" num1; dec2bin "$num2" num2
+  }
   # 0-pad to maxln if needed
   ((${#num1}>${#num2})) && num2="${(l:${#num1}::0:)num2}"
   ((${#num2}>${#num1})) && num1="${(l:${#num2}::0:)num1}"
@@ -841,7 +856,9 @@ alxor() {
   done
   # remove 0-pad to restore original data ln
   ((rem)) && out=${out:$((60-rem))}
-  bin2dat "$out" "$outvar"
+  ! [[ -z "$strmod" ]] && {
+    bin2dat "$out" "$outvar"
+  } || bin2dec "$out" "$outvar"
 }
 
 ## bitwise XNOR
@@ -850,8 +867,11 @@ alxnor() {
   local -i y pad_ln rem orig_ln
   [[ -z "$num1" || -z "$num2" ]] && return 1
   # conv to binary
-  dat2bin "$num1" num1
-  dat2bin "$num2" num2
+  ! [[ -z "$strmod" ]] && {
+    dat2bin "$num1" num1; dat2bin "$num2" num2
+  } || {
+    dec2bin "$num1" num1; dec2bin "$num2" num2
+  }
   # 0-pad to maxln if needed
   ((${#num1}>${#num2})) && num2="${(l:${#num1}::0:)num2}"
   ((${#num2}>${#num1})) && num1="${(l:${#num2}::0:)num1}"
@@ -875,7 +895,9 @@ alxnor() {
   done
   # remove 0-pad to restore original data ln
   ((rem)) && out=${out:$((60-rem))}
-  bin2dat "$out" "$outvar"
+  ! [[ -z "$strmod" ]] && {
+    bin2dat "$out" "$outvar"
+  } || bin2dec "$out" "$outvar"
 }
 
 ## bitwise AND
@@ -884,8 +906,11 @@ aland() {
   local -i y pad_ln rem orig_ln
   [[ -z "$num1" || -z "$num2" ]] && return 1
   # conv to binary
-  dat2bin "$num1" num1
-  dat2bin "$num2" num2
+  ! [[ -z "$strmod" ]] && {
+    dat2bin "$num1" num1; dat2bin "$num2" num2
+  } || {
+    dec2bin "$num1" num1; dec2bin "$num2" num2
+  }
   # 0-pad to maxln if needed
   ((${#num1}>${#num2})) && num2="${(l:${#num1}::0:)num2}"
   ((${#num2}>${#num1})) && num1="${(l:${#num2}::0:)num1}"
@@ -909,7 +934,9 @@ aland() {
   done
   # remove 0-pad to restore original data ln
   ((rem)) && out=${out:$((60-rem))}
-  bin2dat "$out" "$outvar"
+  ! [[ -z "$strmod" ]] && {
+    bin2dat "$out" "$outvar"
+  } || bin2dec "$out" "$outvar"
 }
 
 ## bitwise OR
@@ -918,8 +945,11 @@ alor() {
   local -i y pad_ln rem orig_ln
   [[ -z "$num1" || -z "$num2" ]] && return 1
   # conv to binary
-  dat2bin "$num1" num1
-  dat2bin "$num2" num2
+  ! [[ -z "$strmod" ]] && {
+    dat2bin "$num1" num1; dat2bin "$num2" num2
+  } || {
+    dec2bin "$num1" num1; dec2bin "$num2" num2
+  }
   # 0-pad to maxln if needed
   ((${#num1}>${#num2})) && num2="${(l:${#num1}::0:)num2}"
   ((${#num2}>${#num1})) && num1="${(l:${#num2}::0:)num1}"
@@ -943,7 +973,9 @@ alor() {
   done
   # remove 0-pad to restore original data ln
   ((rem)) && out=${out:$((60-rem))}
-  bin2dat "$out" "$outvar"
+  ! [[ -z "$strmod" ]] && {
+    bin2dat "$out" "$outvar"
+  } || bin2dec "$out" "$outvar"
 }
 
 ## bitwise NOR
@@ -952,8 +984,11 @@ alnor() {
   local -i y pad_ln rem orig_ln
   [[ -z "$num1" || -z "$num2" ]] && return 1
   # conv to binary
-  dat2bin "$num1" num1
-  dat2bin "$num2" num2
+  ! [[ -z "$strmod" ]] && {
+    dat2bin "$num1" num1; dat2bin "$num2" num2
+  } || {
+    dec2bin "$num1" num1; dec2bin "$num2" num2"
+  }
   # 0-pad to maxln if needed
   ((${#num1}>${#num2})) && num2="${(l:${#num1}::0:)num2}"
   ((${#num2}>${#num1})) && num1="${(l:${#num2}::0:)num1}"
@@ -977,7 +1012,9 @@ alnor() {
   done
   # remove 0-pad to restore original data ln
   ((rem)) && out=${out:$((60-rem))}
-  bin2dat "$out" "$outvar"
+  ! [[ -z "$strmod" ]] && {
+    bin2dat "$out" "$outvar"
+  } || bin2dec "$out" "$outvar"
 }
 
 ## bitwise NAND
@@ -986,8 +1023,11 @@ alnand() {
   local -i y pad_ln rem orig_ln
   [[ -z "$num1" || -z "$num2" ]] && return 1
   # conv to binary
-  dat2bin "$num1" num1
-  dat2bin "$num2" num2
+  ! [[ -z "$strmod" ]] && {
+    dat2bin "$num1" num1; dat2bin "$num2" num2
+  } || {
+    dec2bin "$num1" num1; dec2bin "$num2" num2
+  }
   # 0-pad to maxln if needed
   ((${#num1}>${#num2})) && num2="${(l:${#num1}::0:)num2}"
   ((${#num2}>${#num1})) && num1="${(l:${#num2}::0:)num1}"
@@ -1011,7 +1051,9 @@ alnand() {
   done
   # remove 0-pad to restore original data ln
   ((rem)) && out=${out:$((60-rem))}
-  bin2dat "$out" "$outvar"
+  ! [[ -z "$strmod" ]] && {
+    bin2dat "$out" "$outvar"
+  } || bin2dec "$out" "$outvar"
 }
 
 ## bitwise NOT
@@ -1020,7 +1062,9 @@ alnot() {
   local -i y pad_ln rem orig_ln
   [[ -z "$num1" ]] && return 1
   # conv to binary
-  dat2bin "$num1" num1
+  ! [[ -z "$strmod" ]] && {
+    dat2bin "$num1" num1
+  } || dec2bin "$num1" num1
   orig_ln=${#num1}
   # 0-pad num to a multiple of 60
   rem=$((orig_ln%60))
@@ -1039,5 +1083,7 @@ alnot() {
   done
   # remove 0-pad to restore original data ln
   ((rem)) && out=${out:$((60-rem))}
-  bin2dat "$out" "$outvar"
+  ! [[ -z "$strmod" ]] && {
+    bin2dat "$out" "$outvar"
+  } || bin2dec "$out" "$outvar"
 }

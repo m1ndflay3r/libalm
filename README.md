@@ -111,3 +111,8 @@ Bitwise NAND. Takes two strings of any size (shortest is left padded with 0s), a
 
     alnot <str> <outvar>
 Bitwise NOT. Takes a string and writes its inverse (every 1 becomes a 0, every 0 a 1). Result is stored under <outvar>.
+
+
+
+
+_note: with the exception of albm, all logic functions have the flag "strmod" which when set to a non-empty value results in expecting of raw data input instead of num (this would, for instance, allow you to xor "cat" and "dog")_
