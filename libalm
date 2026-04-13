@@ -742,13 +742,17 @@ albm() {
 ## rotate right
 rrot() {
   local rrot_w="$1" rot_c=${2:-1} outvar=${3:-al_return}
-  local -i t rot_ln
+  local -i str_ln rot_idx
   [[ -z "$rrot_w" ]] && return 1
   dat2bin "$rrot_w" rrot_w
-  rot_ln=$((${#rrot_w}-1))
-  for ((t=0; t<rot_c; t++)); do
-    rrot_w=""${rrot_w:$rot_ln}""${rrot_w::$rot_ln}""
-  done
+  str_ln=${#rrot_w}
+  # modulo rotation count to skip full 360s
+  rot_c=$((rot_c%str_ln))
+  # only slice if we actually need to rotate
+  ((rot_c>0)) && {
+    rot_idx=$((str_ln-rot_c))
+    rrot_w="${rrot_w:$rot_idx}${rrot_w::$rot_idx}"
+  }
   bin2dat "$rrot_w" rrot_w
   eval "$outvar=\"\$rrot_w\""
 }
@@ -756,12 +760,16 @@ rrot() {
 ## rotate left
 lrot() {
   local lrot_w="$1" rot_c=${2:-1} outvar=${3:-al_return}
-  local -i u
+  local -i str_ln
   [[ -z "$lrot_w" ]] && return 1
   dat2bin "$lrot_w" lrot_w
-  for ((u=0; u<rot_c; u++)); do
-    lrot_w=""${lrot_w:1}""${lrot_w::1}""
-  done
+  str_ln=${#lrot_w}
+  # modulo rotation count to skip full 360s
+  rot_c=$((rot_c%str_ln))
+  # only slice if we actually need to rotate
+  ((rot_c>0)) && {
+    lrot_w="${lrot_w:$rot_c}${lrot_w::$rot_c}"
+  }
   bin2dat "$lrot_w" lrot_w
   eval "$outvar=\"\$lrot_w\""
 }
