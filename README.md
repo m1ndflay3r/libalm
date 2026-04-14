@@ -1,5 +1,7 @@
 # libalm
 **libalm** is a fast arbitrary-precision / bignum mathematics library written in pure Zsh. It is designed for use anywhere a signed 64-bit integer just isn't big enough.
+
+> note: libalm explicitly requires a 64-bit build of zsh, and will not run correctly in 32-bit environments without substantial rewrites.
 ## Table of Contents
 - [Arithmetic Functions](#arithmetic)
 - [Conversion Functions](#conversion)
