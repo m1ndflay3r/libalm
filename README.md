@@ -2,6 +2,8 @@
 **libalm** is a fast arbitrary-precision / bignum mathematics library written in pure Zsh. It is designed for use anywhere a signed 64-bit integer just isn't big enough.
 
 > note: libalm explicitly requires a 64-bit build of zsh, and will not run correctly in 32-bit environments without substantial rewrites.
+> 
+
 ## Table of Contents
 - [Arithmetic Functions](#arithmetic)
 - [Conversion Functions](#conversion)
@@ -39,6 +41,7 @@
 ## Logic Functions
 > **Note on strmod:** With the exception of albm, all logic functions below support the strmod flag. When set to a non-empty value, the function expects raw data input instead of numeric input (allowing you to, for instance, XOR the strings "cat" and "dog").
 > 
+
 | Command | Arguments | Description |
 |---|---|---|
 | **albm** | \<num\> \<mask\> \<outvar\> | **Bitmask.** Applies \<mask\> to \<num\>. Set \<hexmask\> to non-empty to treat \<mask\> as a hex value. |
